@@ -1,1 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asphalt Legends Gift Codes - A9 Helper</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .code-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .code-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .code-status {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .code-timestamp {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .code-display {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            word-break: break-all;
+            letter-spacing: 1px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: all;
+            position: relative;
+        }
+        .code-display:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+        .copy-btn {
+            background: rgba(40, 167, 69, 0.3);
+            border: 2px solid rgba(40, 167, 69, 0.5);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            margin: 0.5rem auto;
+            display: block;
+        }
+        .copy-btn:hover {
+            background: rgba(40, 167, 69, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .copy-btn.copied {
+            background: rgba(40, 167, 69, 0.6);
+            border-color: rgba(40, 167, 69, 0.8);
+        }
+        .copy-btn.failed {
+            background: rgba(220, 53, 69, 0.3);
+            border-color: rgba(220, 53, 69, 0.5);
+        }
+        .redeem-btn {
+            background: rgba(255, 193, 7, 0.3);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 1.5rem auto;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: block;
+            text-decoration: none;
+            max-width: 300px;
+        }
+        .redeem-btn:hover {
+            background: rgba(255, 193, 7, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .status-message.show {
+            transform: translateX(0);
+        }
+        .status-message.error {
+            background: rgba(220, 53, 69, 0.9);
+        }
+        .permission-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+        }
+        .permission-notice.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        .manual-steps {
+            text-align: left;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .manual-steps.show {
+            display: block;
+        }
+        .step {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        .no-codes {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin: 2rem 0;
+        }
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 2rem 0;
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            .code-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .copy-btn {
+                max-width: none;
+            }
+            .status-message {
+                right: 10px;
+                left: 10px;
+                transform: translateY(-100px);
+            }
+            .status-message.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎮</div>
+        <div class="title">Asphalt Legends Gift Codes</div>
+        
+        <div id="loadingContainer" class="loading">
+            Loading gift codes<span class="spinner"></span>
+        </div>
+        
+        <div id="codesContainer" style="display: none;"></div>
+        
+        <div id="noCodesMessage" class="no-codes" style="display: none;">
+            📭 No gift codes available at the moment
+        </div>
+        
+        <!-- Permission Notice -->
+        <div class="permission-notice" id="permissionNotice">
+            <strong>🔐 Clipboard Permission Needed</strong><br>
+            Some browsers need permission to copy codes automatically. Click "Allow" when prompted!
+        </div>
+        
+        <!-- Manual Steps for Different Browsers -->
+        <div class="manual-steps" id="manualSteps">
+            <strong>🛠️ Manual Copy Instructions:</strong>
+            <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
+            <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
+            <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
+            <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
+            <div class="step"><strong>Discord/In-App:</strong> Tap and hold code, then select copy</div>
+        </div>
 
+        <!-- Redeem Button -->
+        <a href="https://www.gameloft.com/redeem/asphalt-legends" target="_blank" class="redeem-btn" id="redeemBtn" style="display: none;">
+            🚀 Open Redemption Site
+        </a>
+    </div>
+
+    <!-- Status Message -->
+    <div class="status-message" id="statusMessage"></div>
+
+    <script>
+        let hasClipboardPermission = null;
+        let isMobile = false;
+        let codes = [];
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            isMobile = detectMobile();
+            checkClipboardPermission();
+            loadCodes();
+        });
+
+        // Detect if device is mobile
+        function detectMobile() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/android/i.test(userAgent)) return true;
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return true;
+            if (/windows phone/i.test(userAgent)) return true;
+            if (window.innerWidth <= 768) return true;
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                if (window.innerWidth <= 1024) return true;
+            }
+            return false;
+        }
+
+        // Check clipboard permission
+        async function checkClipboardPermission() {
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const permission = await navigator.permissions.query({name: 'clipboard-write'});
+                    hasClipboardPermission = permission.state === 'granted';
+                } else if (navigator.clipboard && window.isSecureContext) {
+                    // Try a test write to check permission
+                    try {
+                        await navigator.clipboard.writeText('');
+                        hasClipboardPermission = true;
+                    } catch (err) {
+                        hasClipboardPermission = false;
+                    }
+                } else {
+                    hasClipboardPermission = false;
+                }
+            } catch (err) {
+                console.log('Permission check failed:', err);
+                hasClipboardPermission = false;
+            }
+            
+            if (!hasClipboardPermission && isMobile) {
+                document.getElementById('permissionNotice').classList.add('show');
+                document.getElementById('manualSteps').classList.add('show');
+            }
+        }
+
+        // Load codes from URL parameters
+        function loadCodes() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const codesParam = urlParams.get('codes');
+            
+            if (!codesParam) {
+                showNoCodes();
+                return;
+            }
+
+            try {
+                // Decode and parse the codes JSON
+                const decodedCodes = decodeURIComponent(codesParam);
+                codes = JSON.parse(decodedCodes);
+                
+                if (!Array.isArray(codes) || codes.length === 0) {
+                    showNoCodes();
+                    return;
+                }
+                
+                displayCodes();
+            } catch (err) {
+                console.error('Failed to parse codes:', err);
+                showNoCodes();
+            }
+        }
+
+        // Show no codes message
+        function showNoCodes() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('noCodesMessage').style.display = 'block';
+        }
+
+        // Display the codes
+        function displayCodes() {
+            const loadingContainer = document.getElementById('loadingContainer');
+            const codesContainer = document.getElementById('codesContainer');
+            const redeemBtn = document.getElementById('redeemBtn');
+            
+            loadingContainer.style.display = 'none';
+            codesContainer.style.display = 'block';
+            redeemBtn.style.display = 'block';
+            
+            // Clear existing content
+            codesContainer.innerHTML = '';
+            
+            codes.forEach((codeData, index) => {
+                const codeItem = createCodeItem(codeData, index);
+                codesContainer.appendChild(codeItem);
+            });
+        }
+
+        // Create a code item element
+        function createCodeItem(codeData, index) {
+            const codeItem = document.createElement('div');
+            codeItem.className = 'code-item';
+            
+            // Determine status emoji and text
+            let statusEmoji = '🕒';
+            let statusText = 'Unknown';
+            
+            if (codeData.status === 'active') {
+                statusEmoji = '✅';
+                statusText = 'Active';
+            } else if (codeData.status === 'expired') {
+                statusEmoji = '❌';
+                statusText = 'Expired';
+            }
+            
+            // Format timestamp
+            let formattedTime = 'Unknown time';
+            if (codeData.timestamp) {
+                try {
+                    const timestamp = parseInt(codeData.timestamp);
+                    formattedTime = new Date(timestamp * 1000).toLocaleDateString() + ' ' + 
+                                   new Date(timestamp * 1000).toLocaleTimeString();
+                } catch (err) {
+                    formattedTime = codeData.timestamp;
+                }
+            }
+            
+            codeItem.innerHTML = `
+                <div class="code-header">
+                    <div class="code-status">${statusEmoji} ${statusText}</div>
+                    <div class="code-timestamp">${formattedTime}</div>
+                </div>
+                <div class="code-display" onclick="selectText(this)" data-code="${codeData.code}">
+                    ${codeData.code}
+                </div>
+                <button class="copy-btn" onclick="copyCode('${codeData.code}', ${index})" id="copyBtn${index}">
+                    📋 Copy Code
+                </button>
+            `;
+            
+            return codeItem;
+        }
+
+        // Copy code to clipboard
+        async function copyCode(code, index) {
+            const button = document.getElementById(`copyBtn${index}`);
+            const originalText = button.textContent;
+            
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(code);
+                    button.textContent = '✅ Copied!';
+                    button.classList.add('copied');
+                    showStatusMessage('Code copied to clipboard!', 'success');
+                    hasClipboardPermission = true;
+                } else {
+                    throw new Error('Clipboard not available');
+                }
+            } catch (err) {
+                console.log('Clipboard copy failed:', err);
+                button.textContent = '❌ Failed';
+                button.classList.add('failed');
+                showStatusMessage('Copy failed - try manual selection', 'error');
+                
+                // Show manual steps if not already shown
+                if (!document.getElementById('manualSteps').classList.contains('show')) {
+                    document.getElementById('manualSteps').classList.add('show');
+                }
+            }
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied', 'failed');
+            }, 2000);
+        }
+
+        // Select text for manual copying
+        function selectText(element) {
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    showStatusMessage('Code copied to clipboard!', 'success');
+                } else {
+                    showStatusMessage('Code selected - press Ctrl+C to copy', 'info');
+                }
+            } catch (err) {
+                showStatusMessage('Code selected - press Ctrl+C to copy', 'info');
+            }
+        }
+
+        // Show status message
+        function showStatusMessage(message, type = 'success') {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message show';
+            
+            if (type === 'error') {
+                statusMessage.classList.add('error');
+            } else {
+                statusMessage.classList.remove('error');
+            }
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && hasClipboardPermission) {
+                // Page became visible again - user might have come back from redemption site
+                showStatusMessage('Welcome back! Ready to copy more codes', 'success');
+            }
+        });
+    </script>
+</body>
+</html>
