@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copying Giftcode...</title>
+    <title>Copy Giftcode - A9 Helper</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -15,6 +15,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-align: center;
+            padding: 1rem;
         }
         .container {
             background: rgba(255, 255, 255, 0.15);
@@ -23,7 +24,7 @@
             backdrop-filter: blur(15px);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            max-width: 400px;
+            max-width: 450px;
             width: 90%;
         }
         .logo {
@@ -46,6 +47,13 @@
             word-break: break-all;
             letter-spacing: 2px;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: all;
+        }
+        .code:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.02);
         }
         .status {
             margin: 1.5rem 0;
@@ -53,14 +61,83 @@
             font-weight: 500;
             min-height: 1.5rem;
         }
-        .redirect-info {
-            margin-top: 1.5rem;
-            opacity: 0.9;
+        .permission-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
             font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
         }
-        .countdown {
-            font-weight: 700;
+        .permission-notice.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: rgba(40, 167, 69, 0.3);
+            border-color: rgba(40, 167, 69, 0.5);
+        }
+        .btn-primary:hover {
+            background: rgba(40, 167, 69, 0.5);
+        }
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.3);
+            border-color: rgba(108, 117, 125, 0.5);
+        }
+        .steps {
+            text-align: left;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .steps.show {
+            display: block;
+        }
+        .step {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
             color: #FFD700;
+            font-weight: bold;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .spinner {
             width: 18px;
@@ -76,98 +153,205 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .manual-copy {
-            margin-top: 1rem;
-            padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .redirect-info {
+            margin-top: 1.5rem;
+            opacity: 0.9;
+            font-size: 0.95rem;
+            display: none;
         }
-        .manual-copy.show {
-            opacity: 1;
+        .redirect-info.show {
+            display: block;
         }
-        .btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 0.5rem;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .countdown {
+            font-weight: 700;
+            color: #FFD700;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🎁</div>
-        <div class="title">Asphalt Legends Giftcode</div>
-        <div class="code" id="codeDisplay">Loading...</div>
-        <div class="status" id="status">📋 Copying to clipboard...</div>
-        <div class="redirect-info">
+        <div class="logo">📋</div>
+        <div class="title">Copy Asphalt Legends Giftcode</div>
+        <div class="code" id="codeDisplay" onclick="requestClipboardPermission()">Loading...</div>
+        <div class="status" id="status">👆 Tap the code above to copy</div>
+        
+        <!-- Permission Notice -->
+        <div class="permission-notice" id="permissionNotice">
+            <strong>🔐 Clipboard Permission Needed</strong><br>
+            Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
+        </div>
+        
+        <!-- Manual Steps for Different Browsers -->
+        <div class="steps" id="manualSteps">
+            <strong>🛠️ Manual Permission Steps:</strong>
+            <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
+            <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
+            <div class="step"><strong>Safari:</strong> Settings → Websites → Allow clipboard access</div>
+            <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn">
+            📋 Enable Auto-Copy
+        </button>
+        
+        <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn">
+            ✋ Select Code Manually
+        </button>
+        
+        <a href="https://www.gameloft.com/redeem/asphalt-legends" class="btn">
+            🔗 Go to Redemption Page
+        </a>
+        
+        <!-- Auto-redirect info (shows after successful copy) -->
+        <div class="redirect-info" id="redirectInfo">
             <p>Redirecting to redemption page in <span class="countdown" id="countdown">5</span> seconds</p>
             <div class="spinner" id="spinner"></div>
-        </div>
-        <div class="manual-copy" id="manualCopy">
-            <p>💡 <strong>Tip:</strong> The code is already copied!</p>
-            <p>Just paste it on the redemption page</p>
-            <button class="btn" onclick="copyManually()">📋 Copy Again</button>
-            <button class="btn" onclick="redirectNow()">🔗 Go Now</button>
+            <button class="btn" onclick="redirectNow()" style="margin-top: 1rem;">🚀 Go Now</button>
         </div>
     </div>
 
     <script>
         // Get code from URL parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
+        const code = urlParams.get('code') || 'NO_CODE_PROVIDED';
+        
         const codeDisplay = document.getElementById('codeDisplay');
         const status = document.getElementById('status');
-        const countdownEl = document.getElementById('countdown');
-        const spinner = document.getElementById('spinner');
-        const manualCopy = document.getElementById('manualCopy');
+        const permissionNotice = document.getElementById('permissionNotice');
+        const manualSteps = document.getElementById('manualSteps');
+        const redirectInfo = document.getElementById('redirectInfo');
+        const copyBtn = document.getElementById('copyBtn');
+        const selectBtn = document.getElementById('selectBtn');
 
-        let redirectTimer;
+        let hasClipboardPermission = false;
+        let redirectTimer = null;
 
-        function copyToClipboard(text) {
-            // Modern clipboard API
-            if (navigator.clipboard && window.isSecureContext) {
-                return navigator.clipboard.writeText(text);
-            } else {
-                // Fallback for older browsers or non-HTTPS
-                return new Promise((resolve, reject) => {
-                    const textArea = document.createElement('textarea');
-                    textArea.value = text;
-                    textArea.style.position = 'fixed';
-                    textArea.style.left = '-999999px';
-                    textArea.style.top = '-999999px';
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
+        // Display the code immediately
+        codeDisplay.textContent = code;
 
-                    try {
-                        const result = document.execCommand('copy');
-                        document.body.removeChild(textArea);
-                        if (result) {
-                            resolve();
-                        } else {
-                            reject(new Error('Copy failed'));
-                        }
-                    } catch (err) {
-                        document.body.removeChild(textArea);
-                        reject(err);
+        // Check clipboard permission on load
+        async function checkClipboardPermission() {
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const permission = await navigator.permissions.query({name: 'clipboard-write'});
+                    if (permission.state === 'granted') {
+                        hasClipboardPermission = true;
+                        updateUI('ready');
+                        return true;
+                    } else if (permission.state === 'prompt') {
+                        updateUI('needsPermission');
+                        return false;
+                    } else {
+                        updateUI('denied');
+                        return false;
                     }
-                });
+                }
+            } catch (err) {
+                console.log('Permission API not supported');
+            }
+            
+            // Fallback: Try clipboard API directly
+            if (navigator.clipboard && window.isSecureContext) {
+                updateUI('needsPermission');
+                return false;
+            } else {
+                updateUI('fallback');
+                return false;
             }
         }
 
-        function startCountdown() {
+        // Request clipboard permission and copy
+        async function requestClipboardPermission() {
+            try {
+                status.innerHTML = '🔄 Requesting clipboard permission...';
+                
+                // Try to write to clipboard - this will trigger permission prompt
+                await navigator.clipboard.writeText(code);
+                
+                // If we get here, permission was granted
+                hasClipboardPermission = true;
+                updateUI('copied');
+                startRedirectCountdown();
+                
+            } catch (err) {
+                console.log('Clipboard permission denied or failed:', err);
+                
+                if (err.name === 'NotAllowedError') {
+                    updateUI('denied');
+                } else {
+                    updateUI('fallback');
+                }
+            }
+        }
+
+        // Select code for manual copying
+        function selectCode() {
+            const range = document.createRange();
+            range.selectNodeContents(codeDisplay);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            // Try execCommand as fallback
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    updateUI('copied');
+                    startRedirectCountdown();
+                } else {
+                    status.innerHTML = '✋ Code selected - now press Ctrl+C (or Cmd+C on Mac)';
+                }
+            } catch (err) {
+                status.innerHTML = '✋ Code selected - now press Ctrl+C (or Cmd+C on Mac)';
+            }
+        }
+
+        // Update UI based on current state
+        function updateUI(state) {
+            permissionNotice.classList.remove('show');
+            manualSteps.classList.remove('show');
+            redirectInfo.classList.remove('show');
+
+            switch (state) {
+                case 'ready':
+                    status.innerHTML = '✅ Ready! Click the code or button to copy';
+                    copyBtn.textContent = '📋 Copy Code';
+                    break;
+                    
+                case 'needsPermission':
+                    status.innerHTML = '🔐 Click button below to enable auto-copy';
+                    permissionNotice.classList.add('show');
+                    copyBtn.textContent = '📋 Enable Auto-Copy';
+                    break;
+                    
+                case 'denied':
+                    status.innerHTML = '⚠️ Permission denied - use manual copy options';
+                    manualSteps.classList.add('show');
+                    copyBtn.style.display = 'none';
+                    selectBtn.textContent = '✋ Select & Copy Code';
+                    break;
+                    
+                case 'fallback':
+                    status.innerHTML = '📱 Use manual copy options below';
+                    manualSteps.classList.add('show');
+                    copyBtn.style.display = 'none';
+                    break;
+                    
+                case 'copied':
+                    status.innerHTML = '✅ Code copied to clipboard!';
+                    copyBtn.textContent = '✅ Copied!';
+                    copyBtn.style.background = 'rgba(40, 167, 69, 0.5)';
+                    break;
+            }
+        }
+
+        // Start redirect countdown
+        function startRedirectCountdown() {
+            redirectInfo.classList.add('show');
             let countdown = 5;
+            const countdownEl = document.getElementById('countdown');
+            
             redirectTimer = setInterval(() => {
                 countdown--;
                 countdownEl.textContent = countdown;
@@ -178,62 +362,35 @@
             }, 1000);
         }
 
+        // Redirect to redemption site
         function redirectToSite() {
-            spinner.style.display = 'none';
-            status.innerHTML = '🔗 Redirecting to Asphalt Legends...';
-            setTimeout(() => {
-                window.location.href = 'https://www.gameloft.com/redeem/asphalt-legends';
-            }, 500);
+            window.location.href = 'https://www.gameloft.com/redeem/asphalt-legends';
         }
 
-        function copyManually() {
-            copyToClipboard(code).then(() => {
-                status.innerHTML = '✅ Copied again!';
-                setTimeout(() => {
-                    status.innerHTML = '✅ Code copied to clipboard!';
-                }, 1500);
-            }).catch(() => {
-                status.innerHTML = '⚠️ Please select and copy the code manually';
-            });
-        }
-
+        // Redirect immediately
         function redirectNow() {
-            clearInterval(redirectTimer);
+            if (redirectTimer) clearInterval(redirectTimer);
             redirectToSite();
         }
 
-        // Main execution
-        if (code) {
-            codeDisplay.textContent = code;
-
-            // Attempt to copy to clipboard
-            copyToClipboard(code).then(() => {
-                status.innerHTML = '✅ Code copied to clipboard!';
-                manualCopy.classList.add('show');
-                startCountdown();
-            }).catch((err) => {
-                console.log('Clipboard copy failed:', err);
-                status.innerHTML = '⚠️ Auto-copy failed - please copy manually';
-                manualCopy.classList.add('show');
-
-                // Still start countdown but show manual copy options
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            checkClipboardPermission();
+            
+            // Auto-request permission if code is provided and browser supports it
+            if (code !== 'NO_CODE_PROVIDED' && navigator.clipboard && window.isSecureContext) {
                 setTimeout(() => {
-                    startCountdown();
+                    if (!hasClipboardPermission) {
+                        permissionNotice.classList.add('show');
+                    }
                 }, 1000);
-            });
-        } else {
-            codeDisplay.textContent = 'ERROR: No code provided';
-            status.innerHTML = '❌ Invalid request - no giftcode found';
-            spinner.style.display = 'none';
-            document.querySelector('.redirect-info').innerHTML = 
-                '<p><a href="https://www.gameloft.com/redeem/asphalt-legends" style="color: #FFD700;">Go to redemption page manually</a></p>';
-        }
+            }
+        });
 
-        // Handle page visibility changes (mobile apps switching)
+        // Handle page visibility changes (mobile app switching)
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && code) {
-                // Page became visible again, maybe user came back from redemption page
-                status.innerHTML = '✅ Welcome back! Code is still copied to clipboard';
+            if (document.visibilityState === 'visible' && hasClipboardPermission) {
+                status.innerHTML = '✅ Welcome back! Code is in your clipboard';
             }
         });
     </script>
