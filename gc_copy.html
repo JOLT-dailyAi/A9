@@ -180,6 +180,14 @@
             display: block;
             animation: slideIn 0.3s ease;
         }
+        #discordNotice {
+            background: rgba(88, 101, 242, 0.3) !important;
+            border: 2px solid rgba(88, 101, 242, 0.8) !important;
+            display: none !important;
+        }
+        #discordNotice.show {
+            display: block !important;
+        }
     </style>
 </head>
 <body>
@@ -222,7 +230,7 @@
         </div>
         
         <!-- Discord app notice -->
-        <div class="mobile-notice" id="discordNotice" style="display: none; background: rgba(88, 101, 242, 0.9); border: 2px solid rgba(88, 101, 242, 1);">
+        <div class="mobile-notice" id="discordNotice" style="display: none;">
             <div style="text-align: center;">
                 <strong>✅ Code Copied Successfully!</strong><br>
                 <span style="font-size: 0.9rem;">Please open redemption site in external browser</span><br>
