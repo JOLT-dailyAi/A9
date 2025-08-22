@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copying Giftcode...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 400px;
+            width: 90%;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .code {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            word-break: break-all;
+            letter-spacing: 2px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .status {
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            min-height: 1.5rem;
+        }
+        .redirect-info {
+            margin-top: 1.5rem;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        .countdown {
+            font-weight: 700;
+            color: #FFD700;
+        }
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .manual-copy {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .manual-copy.show {
+            opacity: 1;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎁</div>
+        <div class="title">Asphalt Legends Giftcode</div>
+        <div class="code" id="codeDisplay">Loading...</div>
+        <div class="status" id="status">📋 Copying to clipboard...</div>
+        <div class="redirect-info">
+            <p>Redirecting to redemption page in <span class="countdown" id="countdown">5</span> seconds</p>
+            <div class="spinner" id="spinner"></div>
+        </div>
+        <div class="manual-copy" id="manualCopy">
+            <p>💡 <strong>Tip:</strong> The code is already copied!</p>
+            <p>Just paste it on the redemption page</p>
+            <button class="btn" onclick="copyManually()">📋 Copy Again</button>
+            <button class="btn" onclick="redirectNow()">🔗 Go Now</button>
+        </div>
+    </div>
+
+    <script>
+        // Get code from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const codeDisplay = document.getElementById('codeDisplay');
+        const status = document.getElementById('status');
+        const countdownEl = document.getElementById('countdown');
+        const spinner = document.getElementById('spinner');
+        const manualCopy = document.getElementById('manualCopy');
+
+        let redirectTimer;
+
+        function copyToClipboard(text) {
+            // Modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            } else {
+                // Fallback for older browsers or non-HTTPS
+                return new Promise((resolve, reject) => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+
+                    try {
+                        const result = document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        if (result) {
+                            resolve();
+                        } else {
+                            reject(new Error('Copy failed'));
+                        }
+                    } catch (err) {
+                        document.body.removeChild(textArea);
+                        reject(err);
+                    }
+                });
+            }
+        }
+
+        function startCountdown() {
+            let countdown = 5;
+            redirectTimer = setInterval(() => {
+                countdown--;
+                countdownEl.textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(redirectTimer);
+                    redirectToSite();
+                }
+            }, 1000);
+        }
+
+        function redirectToSite() {
+            spinner.style.display = 'none';
+            status.innerHTML = '🔗 Redirecting to Asphalt Legends...';
+            setTimeout(() => {
+                window.location.href = 'https://www.gameloft.com/redeem/asphalt-legends';
+            }, 500);
+        }
+
+        function copyManually() {
+            copyToClipboard(code).then(() => {
+                status.innerHTML = '✅ Copied again!';
+                setTimeout(() => {
+                    status.innerHTML = '✅ Code copied to clipboard!';
+                }, 1500);
+            }).catch(() => {
+                status.innerHTML = '⚠️ Please select and copy the code manually';
+            });
+        }
+
+        function redirectNow() {
+            clearInterval(redirectTimer);
+            redirectToSite();
+        }
+
+        // Main execution
+        if (code) {
+            codeDisplay.textContent = code;
+
+            // Attempt to copy to clipboard
+            copyToClipboard(code).then(() => {
+                status.innerHTML = '✅ Code copied to clipboard!';
+                manualCopy.classList.add('show');
+                startCountdown();
+            }).catch((err) => {
+                console.log('Clipboard copy failed:', err);
+                status.innerHTML = '⚠️ Auto-copy failed - please copy manually';
+                manualCopy.classList.add('show');
+
+                // Still start countdown but show manual copy options
+                setTimeout(() => {
+                    startCountdown();
+                }, 1000);
+            });
+        } else {
+            codeDisplay.textContent = 'ERROR: No code provided';
+            status.innerHTML = '❌ Invalid request - no giftcode found';
+            spinner.style.display = 'none';
+            document.querySelector('.redirect-info').innerHTML = 
+                '<p><a href="https://www.gameloft.com/redeem/asphalt-legends" style="color: #FFD700;">Go to redemption page manually</a></p>';
+        }
+
+        // Handle page visibility changes (mobile apps switching)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && code) {
+                // Page became visible again, maybe user came back from redemption page
+                status.innerHTML = '✅ Welcome back! Code is still copied to clipboard';
+            }
+        });
+    </script>
+</body>
+</html>
