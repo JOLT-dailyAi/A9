@@ -198,7 +198,7 @@
         <!-- Mobile Notice -->
         <div class="mobile-notice" id="mobileNotice">
             <strong>📱 Mobile Device Detected</strong><br>
-            After copying, we'll open the redemption page in your default browser automatically!
+            <span id="inAppWarning">After copying, we'll open the redemption page in your default browser automatically!</span>
         </div>
         
         <!-- Manual Steps for Different Browsers -->
@@ -274,25 +274,100 @@
             return false;
         }
 
+        // Detect in-app browsers
+        function detectInAppBrowser() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Common in-app browsers
+            if (userAgent.includes('FBAN') || userAgent.includes('FBAV')) return 'Facebook';
+            if (userAgent.includes('Instagram')) return 'Instagram';
+            if (userAgent.includes('Twitter')) return 'Twitter';
+            if (userAgent.includes('LinkedInApp')) return 'LinkedIn';
+            if (userAgent.includes('WhatsApp')) return 'WhatsApp';
+            if (userAgent.includes('Snapchat')) return 'Snapchat';
+            if (userAgent.includes('TikTok')) return 'TikTok';
+            if (userAgent.includes('Discord')) return 'Discord';
+            if (userAgent.includes('Telegram')) return 'Telegram';
+            if (userAgent.includes('Line')) return 'Line';
+            
+            return null;
+        }
+
         // Open URL in mobile's default browser
         function openInDefaultBrowser(url) {
+            const inAppBrowser = detectInAppBrowser();
+            
             if (isMobile) {
-                // For mobile devices, try to force opening in default browser
-                // Create a temporary link and click it
-                const tempLink = document.createElement('a');
-                tempLink.href = url;
-                tempLink.target = '_blank';
-                tempLink.rel = 'noopener noreferrer';
+                // Method 1: Try multiple aggressive approaches for in-app browsers
+                if (inAppBrowser) {
+                    console.log(`Detected ${inAppBrowser} in-app browser`);
+                    
+                    // Try intent URLs for Android
+                    if (/android/i.test(navigator.userAgent)) {
+                        const intentUrl = `intent://${url.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+                        window.location.href = intentUrl;
+                        
+                        // Fallback after delay
+                        setTimeout(() => {
+                            window.location.href = url;
+                        }, 500);
+                        return;
+                    }
+                    
+                    // Try iOS Universal Links approach
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        // Try to trigger Safari
+                        window.location.href = `x-web-search://?${url}`;
+                        
+                        setTimeout(() => {
+                            window.location.href = url;
+                        }, 500);
+                        return;
+                    }
+                }
                 
-                // Add to DOM temporarily
-                document.body.appendChild(tempLink);
-                tempLink.click();
-                document.body.removeChild(tempLink);
+                // Method 2: Create multiple link attempts with different strategies
+                const strategies = [
+                    () => {
+                        // Strategy 1: Direct location change
+                        window.location.href = url;
+                    },
+                    () => {
+                        // Strategy 2: New window with specific features
+                        window.open(url, '_blank', 'location=yes,height=800,width=600,scrollbars=yes,status=yes');
+                    },
+                    () => {
+                        // Strategy 3: Create and click link
+                        const tempLink = document.createElement('a');
+                        tempLink.href = url;
+                        tempLink.target = '_system'; // PhoneGap/Cordova hint
+                        tempLink.rel = 'external'; // Additional hint
+                        document.body.appendChild(tempLink);
+                        
+                        // Force click event
+                        const clickEvent = new MouseEvent('click', {
+                            view: window,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        tempLink.dispatchEvent(clickEvent);
+                        document.body.removeChild(tempLink);
+                    },
+                    () => {
+                        // Strategy 4: Try to break out with top window
+                        if (window.top !== window.self) {
+                            window.top.location.href = url;
+                        } else {
+                            window.location.replace(url);
+                        }
+                    }
+                ];
                 
-                // Additional attempt for better mobile support
-                setTimeout(() => {
-                    window.open(url, '_blank', 'noopener,noreferrer');
-                }, 100);
+                // Execute strategies with delays
+                strategies.forEach((strategy, index) => {
+                    setTimeout(strategy, index * 200);
+                });
+                
             } else {
                 // For desktop, normal redirect
                 window.location.href = url;
@@ -462,7 +537,16 @@
         window.addEventListener('load', () => {
             // Detect mobile device
             isMobile = detectMobile();
+            const inAppBrowser = detectInAppBrowser();
+            
             console.log('Mobile device detected:', isMobile);
+            console.log('In-app browser detected:', inAppBrowser);
+            
+            // Update mobile notice if in-app browser detected
+            if (inAppBrowser) {
+                const inAppWarning = document.getElementById('inAppWarning');
+                inAppWarning.innerHTML = `🔴 <strong>${inAppBrowser} in-app browser detected!</strong><br>We'll try multiple methods to open in your default browser. You may need to manually copy the URL: <br><code style="font-size:0.8em;">https://www.gameloft.com/redeem/asphalt-legends</code>`;
+            }
             
             checkClipboardPermission();
             
