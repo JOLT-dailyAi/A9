@@ -166,68 +166,19 @@
             font-weight: 700;
             color: #FFD700;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal.show {
-            display: flex;
-        }
-        .modal-content {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 2rem;
+        .mobile-notice {
+            background: rgba(0, 123, 255, 0.2);
+            border: 2px solid rgba(0, 123, 255, 0.5);
+            padding: 1rem;
             border-radius: 12px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            max-width: 400px;
-            width: 90%;
-            text-align: left;
-        }
-        .modal-content h2 {
-            margin-top: 0;
-            font-size: 1.3rem;
-            color: #FFD700;
-        }
-        .modal-content p {
             margin: 1rem 0;
+            font-size: 0.95rem;
             line-height: 1.5;
+            display: none;
         }
-        .modal-content a {
-            color: #FFD700;
-            text-decoration: underline;
-            word-break: break-all;
-        }
-        .modal-content .btn {
-            width: 100%;
-            text-align: center;
-        }
-        .modal-content .menu-instruction {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 1rem;
-        }
-        @media (max-width: 400px) {
-            .modal-content {
-                padding: 1.5rem;
-            }
-            .modal-content .menu-instruction {
-                flex-direction: column;
-                text-align: center;
-            }
-            .modal-content .menu-instruction > div:last-child {
-                margin-top: 1rem;
-                margin-left: 0;
-            }
+        .mobile-notice.show {
+            display: block;
+            animation: slideIn 0.3s ease;
         }
     </style>
 </head>
@@ -235,13 +186,19 @@
     <div class="container">
         <div class="logo">📋</div>
         <div class="title">Copy Asphalt Legends Giftcode</div>
-        <div class="code" id="codeDisplay" onclick="requestClipboardPermission()" tabindex="0" role="button" aria-label="Copy gift code">Loading...</div>
+        <div class="code" id="codeDisplay" onclick="requestClipboardPermission()">Loading...</div>
         <div class="status" id="status">👆 Tap the code above to copy</div>
         
         <!-- Permission Notice -->
         <div class="permission-notice" id="permissionNotice">
             <strong>🔐 Clipboard Permission Needed</strong><br>
             Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
+        </div>
+        
+        <!-- Mobile Notice -->
+        <div class="mobile-notice" id="mobileNotice">
+            <strong>📱 Mobile Device Detected</strong><br>
+            After copying, we'll open the redemption page in your default browser automatically!
         </div>
         
         <!-- Manual Steps for Different Browsers -->
@@ -254,46 +211,23 @@
         </div>
 
         <!-- Action Buttons -->
-        <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn" aria-label="Copy gift code to clipboard">
+        <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn">
             📋 Enable Auto-Copy
         </button>
         
-        <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn" aria-label="Select gift code manually">
+        <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn">
             ✋ Select Code Manually
         </button>
         
-        <a href="https://www.gameloft.com/redeem/asphalt-legends" class="btn" target="_blank" aria-label="Go to redemption page">
+        <a href="https://www.gameloft.com/redeem/asphalt-legends" class="btn">
             🔗 Go to Redemption Page
         </a>
         
-        <!-- Auto-redirect info (shows after successful copy in non-Discord) -->
+        <!-- Auto-redirect info (shows after successful copy) -->
         <div class="redirect-info" id="redirectInfo">
             <p id="redirectMessage">Redirecting to redemption page in <span class="countdown" id="countdown">5</span> seconds</p>
             <div class="spinner" id="spinner"></div>
-            <button class="btn" onclick="redirectNow()" style="margin-top: 1rem;" aria-label="Go to redemption page now">🚀 Go Now</button>
-        </div>
-    </div>
-
-    <!-- Modal for Discord users -->
-    <div class="modal" id="discordModal">
-        <div class="modal-content">
-            <h2>🤖 Discord App Detected</h2>
-            <p><span style="color: #28A745;">✅ Gift code copied!</span> You're in Discord's in-app browser. To redeem, open this link in Chrome or your default browser:</p>
-            <p><a href="https://www.gameloft.com/redeem/asphalt-legends" target="_blank">https://www.gameloft.com/redeem/asphalt-legends</a></p>
-            <p><strong>Steps:</strong></p>
-            <ol>
-                <li>Tap the menu (⋮) in the bottom-right corner of Discord.</li>
-                <li>Select "Open in Browser" to open in Chrome or your default browser.</li>
-                <li>Paste the gift code there to redeem.</li>
-            </ol>
-            <div class="menu-instruction">
-                <div>Tap the menu to open in Chrome:</div>
-                <div style="display: flex; flex-direction: column; align-items: center; margin-left: 1rem;">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">↗️</div>
-                    <div style="font-size: 0.8rem; text-align: center;">Tap here<br>for menu</div>
-                </div>
-            </div>
-            <button class="btn btn-secondary" onclick="closeModal()" aria-label="Close modal">Close</button>
+            <button class="btn" onclick="redirectNow()" style="margin-top: 1rem;">🚀 Go Now</button>
         </div>
     </div>
 
@@ -305,93 +239,148 @@
         const codeDisplay = document.getElementById('codeDisplay');
         const status = document.getElementById('status');
         const permissionNotice = document.getElementById('permissionNotice');
+        const mobileNotice = document.getElementById('mobileNotice');
         const manualSteps = document.getElementById('manualSteps');
         const redirectInfo = document.getElementById('redirectInfo');
         const redirectMessage = document.getElementById('redirectMessage');
-        const discordModal = document.getElementById('discordModal');
         const copyBtn = document.getElementById('copyBtn');
         const selectBtn = document.getElementById('selectBtn');
 
         let hasClipboardPermission = false;
         let redirectTimer = null;
         let isMobile = false;
-        let isInDiscordApp = false;
 
-        // Display the code immediately or handle missing code
-        window.addEventListener('load', () => {
-            if (code === 'NO_CODE_PROVIDED' || !code) {
-                codeDisplay.textContent = 'No code provided';
-                status.innerHTML = '⚠️ Please provide a valid gift code in the URL';
-                copyBtn.style.display = 'none';
-                selectBtn.style.display = 'none';
-                document.querySelector('a.btn').style.display = 'none';
-                return;
-            }
-            codeDisplay.textContent = code;
-            
-            // Detect mobile device and Discord app
-            isMobile = detectMobile();
-            isInDiscordApp = detectInAppBrowser() === 'Discord';
-            
-            console.log('Mobile:', isMobile, 'Discord App:', isInDiscordApp);
-            
-            checkClipboardPermission();
-            
-            // Auto-copy attempt if clipboard is available and code is provided
-            if (code !== 'NO_CODE_PROVIDED' && navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(code).then(() => {
-                    hasClipboardPermission = true;
-                    updateUI('copied');
-                    startRedirectOrModal();
-                }).catch(() => {
-                    updateUI('needsPermission');
-                    if (isMobile) permissionNotice.classList.add('show');
-                });
-            } else {
-                updateUI('fallback');
-                if (isMobile) permissionNotice.classList.add('show');
-            }
-        });
+        // Display the code immediately
+        codeDisplay.textContent = code;
 
         // Detect if device is mobile
         function detectMobile() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Check for mobile devices
             if (/android/i.test(userAgent)) return true;
             if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return true;
             if (/windows phone/i.test(userAgent)) return true;
+            
+            // Check for tablet/mobile screen size
             if (window.innerWidth <= 768) return true;
+            
+            // Check for touch support
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                // Additional mobile indicators
                 if (window.innerWidth <= 1024) return true;
             }
+            
             return false;
         }
 
         // Detect in-app browsers
         function detectInAppBrowser() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            if (/Discord|com\.discord/i.test(userAgent)) return 'Discord';
+            
+            // Common in-app browsers
+            if (userAgent.includes('FBAN') || userAgent.includes('FBAV')) return 'Facebook';
+            if (userAgent.includes('Instagram')) return 'Instagram';
+            if (userAgent.includes('Twitter')) return 'Twitter';
+            if (userAgent.includes('LinkedInApp')) return 'LinkedIn';
+            if (userAgent.includes('WhatsApp')) return 'WhatsApp';
+            if (userAgent.includes('Snapchat')) return 'Snapchat';
+            if (userAgent.includes('TikTok')) return 'TikTok';
+            if (userAgent.includes('Discord')) return 'Discord';
+            if (userAgent.includes('Telegram')) return 'Telegram';
+            if (userAgent.includes('Line')) return 'Line';
+            
             return null;
         }
 
-        // Open URL in default browser
+        // Open URL in mobile's default browser
         function openInDefaultBrowser(url) {
-            window.location.href = url;
+            const inAppBrowser = detectInAppBrowser();
+            
+            if (isMobile) {
+                // Method 1: Try multiple aggressive approaches for in-app browsers
+                if (inAppBrowser) {
+                    console.log(`Detected ${inAppBrowser} in-app browser`);
+                    
+                    // Try intent URLs for Android
+                    if (/android/i.test(navigator.userAgent)) {
+                        const intentUrl = `intent://${url.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+                        window.location.href = intentUrl;
+                        
+                        // Fallback after delay
+                        setTimeout(() => {
+                            window.location.href = url;
+                        }, 500);
+                        return;
+                    }
+                    
+                    // Try iOS Universal Links approach
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        // Try to trigger Safari
+                        window.location.href = `x-web-search://?${url}`;
+                        
+                        setTimeout(() => {
+                            window.location.href = url;
+                        }, 500);
+                        return;
+                    }
+                }
+                
+                // Method 2: Create multiple link attempts with different strategies
+                const strategies = [
+                    () => {
+                        // Strategy 1: Direct location change
+                        window.location.href = url;
+                    },
+                    () => {
+                        // Strategy 2: New window with specific features
+                        window.open(url, '_blank', 'location=yes,height=800,width=600,scrollbars=yes,status=yes');
+                    },
+                    () => {
+                        // Strategy 3: Create and click link
+                        const tempLink = document.createElement('a');
+                        tempLink.href = url;
+                        tempLink.target = '_system'; // PhoneGap/Cordova hint
+                        tempLink.rel = 'external'; // Additional hint
+                        document.body.appendChild(tempLink);
+                        
+                        // Force click event
+                        const clickEvent = new MouseEvent('click', {
+                            view: window,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        tempLink.dispatchEvent(clickEvent);
+                        document.body.removeChild(tempLink);
+                    },
+                    () => {
+                        // Strategy 4: Try to break out with top window
+                        if (window.top !== window.self) {
+                            window.top.location.href = url;
+                        } else {
+                            window.location.replace(url);
+                        }
+                    }
+                ];
+                
+                // Execute strategies with delays
+                strategies.forEach((strategy, index) => {
+                    setTimeout(strategy, index * 200);
+                });
+                
+            } else {
+                // For desktop, normal redirect
+                window.location.href = url;
+            }
         }
 
-        // Check clipboard permission
+        // Check clipboard permission on load
         async function checkClipboardPermission() {
-            const storedPermission = localStorage.getItem('clipboardPermission');
-            if (storedPermission === 'granted') {
-                hasClipboardPermission = true;
-                updateUI('ready');
-                return true;
-            }
             try {
                 if (navigator.permissions && navigator.permissions.query) {
                     const permission = await navigator.permissions.query({name: 'clipboard-write'});
                     if (permission.state === 'granted') {
                         hasClipboardPermission = true;
-                        localStorage.setItem('clipboardPermission', 'granted');
                         updateUI('ready');
                         return true;
                     } else if (permission.state === 'prompt') {
@@ -405,21 +394,33 @@
             } catch (err) {
                 console.log('Permission API not supported');
             }
-            updateUI('fallback');
-            return false;
+            
+            // Fallback: Try clipboard API directly
+            if (navigator.clipboard && window.isSecureContext) {
+                updateUI('needsPermission');
+                return false;
+            } else {
+                updateUI('fallback');
+                return false;
+            }
         }
 
         // Request clipboard permission and copy
         async function requestClipboardPermission() {
             try {
                 status.innerHTML = '🔄 Requesting clipboard permission...';
+                
+                // Try to write to clipboard - this will trigger permission prompt
                 await navigator.clipboard.writeText(code);
+                
+                // If we get here, permission was granted
                 hasClipboardPermission = true;
-                localStorage.setItem('clipboardPermission', 'granted');
                 updateUI('copied');
-                startRedirectOrModal();
+                startRedirectCountdown();
+                
             } catch (err) {
                 console.log('Clipboard permission denied or failed:', err);
+                
                 if (err.name === 'NotAllowedError') {
                     updateUI('denied');
                 } else {
@@ -435,11 +436,13 @@
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
+            
+            // Try execCommand as fallback
             try {
                 const success = document.execCommand('copy');
                 if (success) {
                     updateUI('copied');
-                    startRedirectOrModal();
+                    startRedirectCountdown();
                 } else {
                     status.innerHTML = '✋ Code selected - now press Ctrl+C (or Cmd+C on Mac)';
                 }
@@ -451,31 +454,39 @@
         // Update UI based on current state
         function updateUI(state) {
             permissionNotice.classList.remove('show');
+            mobileNotice.classList.remove('show');
             manualSteps.classList.remove('show');
             redirectInfo.classList.remove('show');
-            discordModal.classList.remove('show');
 
             switch (state) {
                 case 'ready':
                     status.innerHTML = '✅ Ready! Click the code or button to copy';
                     copyBtn.textContent = '📋 Copy Code';
+                    if (isMobile) mobileNotice.classList.add('show');
                     break;
+                    
                 case 'needsPermission':
                     status.innerHTML = '🔐 Click button below to enable auto-copy';
                     permissionNotice.classList.add('show');
+                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.textContent = '📋 Enable Auto-Copy';
                     break;
+                    
                 case 'denied':
                     status.innerHTML = '⚠️ Permission denied - use manual copy options';
                     manualSteps.classList.add('show');
+                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.style.display = 'none';
                     selectBtn.textContent = '✋ Select & Copy Code';
                     break;
+                    
                 case 'fallback':
                     status.innerHTML = '📱 Use manual copy options below';
                     manualSteps.classList.add('show');
+                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.style.display = 'none';
                     break;
+                    
                 case 'copied':
                     status.innerHTML = '✅ Code copied to clipboard!';
                     copyBtn.textContent = '✅ Copied!';
@@ -484,16 +495,17 @@
             }
         }
 
-        // Start redirect or show modal for Discord users
-        function startRedirectOrModal() {
-            if (isInDiscordApp) {
-                discordModal.classList.add('show');
-                return;
-            }
+        // Start redirect countdown
+        function startRedirectCountdown() {
             redirectInfo.classList.add('show');
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
-            redirectMessage.innerHTML = `Redirecting to redemption page in <span class="countdown" id="countdown">${countdown}</span> seconds`;
+            
+            // Update message for mobile
+            if (isMobile) {
+                redirectMessage.innerHTML = `Opening redemption page in default browser in <span class="countdown" id="countdown">${countdown}</span> seconds`;
+            }
+            
             redirectTimer = setInterval(() => {
                 countdown--;
                 countdownEl.textContent = countdown;
@@ -507,54 +519,43 @@
         // Redirect to redemption site
         function redirectToSite() {
             const url = 'https://www.gameloft.com/redeem/asphalt-legends';
-            openInDefaultBrowser(url);
+            
+            if (isMobile) {
+                openInDefaultBrowser(url);
+            } else {
+                window.location.href = url;
+            }
         }
 
         // Redirect immediately
         function redirectNow() {
             if (redirectTimer) clearInterval(redirectTimer);
             redirectToSite();
-            document.querySelector('.btn[onclick="redirectNow()"]').disabled = true;
-        }
-
-        // Close modal
-        function closeModal() {
-            discordModal.classList.remove('show');
         }
 
         // Initialize on page load
         window.addEventListener('load', () => {
-            // Detect mobile device and Discord app
+            // Detect mobile device
             isMobile = detectMobile();
-            isInDiscordApp = detectInAppBrowser() === 'Discord';
-            
-            console.log('Mobile:', isMobile, 'Discord App:', isInDiscordApp);
+            console.log('Mobile device detected:', isMobile);
             
             checkClipboardPermission();
             
-            // Auto-copy attempt if code is provided and browser supports it
+            // Auto-request permission if code is provided and browser supports it
             if (code !== 'NO_CODE_PROVIDED' && navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(code).then(() => {
-                    hasClipboardPermission = true;
-                    updateUI('copied');
-                    startRedirectOrModal();
-                }).catch(() => {
-                    updateUI('needsPermission');
-                    if (isMobile) permissionNotice.classList.add('show');
-                });
-            } else {
-                updateUI('fallback');
-                if (isMobile) permissionNotice.classList.add('show');
+                setTimeout(() => {
+                    if (!hasClipboardPermission) {
+                        permissionNotice.classList.add('show');
+                        if (isMobile) mobileNotice.classList.add('show');
+                    }
+                }, 1000);
             }
         });
 
-        // Handle page visibility changes
+        // Handle page visibility changes (mobile app switching)
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && hasClipboardPermission) {
                 status.innerHTML = '✅ Welcome back! Code is in your clipboard';
-                if (isInDiscordApp) {
-                    discordModal.classList.add('show');
-                }
             }
         });
     </script>
