@@ -395,14 +395,10 @@
                     break;
                     
                 case 'copied':
-                    status.innerHTML = '✅ Code copied successfully!';
                     copyBtn.textContent = '✅ Copied!';
                     copyBtn.style.background = 'rgba(40, 167, 69, 0.5)';
                     
-                    // Show Discord notice if in Discord app
-                    if (isInDiscordApp) {
-                        discordNotice.style.display = 'block';
-                    }
+                    // Don't set status here - let startRedirectCountdown handle it
                     break;
             }
         }
@@ -412,6 +408,7 @@
             // Don't redirect if in Discord app - just show the notice
             if (isInDiscordApp) {
                 discordNotice.style.display = 'block';
+                status.innerHTML = '✅ Code copied successfully!';
                 return;
             }
             
