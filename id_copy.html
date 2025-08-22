@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy Asphalt ID - A9 Helper</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            max-width: 450px;
+            width: 90%;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .code {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            word-break: break-all;
+            letter-spacing: 2px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: all;
+        }
+        .code:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.02);
+        }
+        .status {
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            min-height: 1.5rem;
+        }
+        .permission-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+        }
+        .permission-notice.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: rgba(40, 167, 69, 0.3);
+            border-color: rgba(40, 167, 69, 0.5);
+        }
+        .btn-primary:hover {
+            background: rgba(40, 167, 69, 0.5);
+        }
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.3);
+            border-color: rgba(108, 117, 125, 0.5);
+        }
+        .steps {
+            text-align: left;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .steps.show {
+            display: block;
+        }
+        .step {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .note {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-left: 4px solid #FFD700;
+        }
+        .info-section {
+            text-align: left;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: block;
+        }
+        .info-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🆔</div>
+        <div class="title">Copy Your Asphalt ID</div>
+        <div class="code" id="codeDisplay" onclick="requestClipboardPermission()" tabindex="0" role="button" aria-label="Copy Asphalt ID">Loading...</div>
+        <div class="status" id="status">👆 Tap the ID above to copy</div>
+        
+        <!-- Permission Notice -->
+        <div class="permission-notice" id="permissionNotice">
+            <strong>🔐 Clipboard Permission Needed</strong><br>
+            Your browser needs permission to copy your ID automatically. Click "Allow" when prompted!
+        </div>
+        
+        <!-- Manual Steps for Different Browsers -->
+        <div class="steps" id="manualSteps">
+            <strong>🛠️ Manual Copy Steps:</strong>
+            <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
+            <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
+            <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
+            <div class="step"><strong>Mobile:</strong> Tap and hold the ID → Select "Copy"</div>
+            <div class="step"><strong>Discord/In-App:</strong> Long press the ID to select and copy</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn" aria-label="Copy Asphalt ID to clipboard">
+            📋 Enable Auto-Copy
+        </button>
+        
+        <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn" aria-label="Select Asphalt ID manually">
+            📋 Copy ID
+        </button>
+
+        <!-- Information about Asphalt ID usage -->
+        <div class="info-section">
+            <div class="info-title">💡 About Your Asphalt Player ID</div>
+            <div class="step">Unique ID that identifies your account</div>
+            <div class="step">Needed to redeem gift codes & rewards</div>
+            <div class="step">Useful when contacting Gameloft support</div>
+            <div class="step">Helps sync progress across devices</div>
+            <div class="step">Keep it safe, don't share publicly</div>
+        </div>
+
+        <div class="note">
+            <strong>🔒 Privacy Note:</strong> Your Asphalt ID is unique to your account. Only share it with trusted friends or club members.
+        </div>
+    </div>
+
+    <script>
+        // Get ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const asphaltId = urlParams.get('id') || 'NO_ID_PROVIDED';
+        
+        const codeDisplay = document.getElementById('codeDisplay');
+        const status = document.getElementById('status');
+        const permissionNotice = document.getElementById('permissionNotice');
+        const manualSteps = document.getElementById('manualSteps');
+        const copyBtn = document.getElementById('copyBtn');
+        const selectBtn = document.getElementById('selectBtn');
+
+        let hasClipboardPermission = false;
+        let isMobile = false;
+
+        // Display the ID immediately or handle missing ID
+        window.addEventListener('load', () => {
+            if (asphaltId === 'NO_ID_PROVIDED' || !asphaltId) {
+                codeDisplay.textContent = 'No ID provided';
+                status.innerHTML = '⚠️ Please provide a valid Asphalt ID in the URL';
+                copyBtn.style.display = 'none';
+                selectBtn.style.display = 'none';
+                return;
+            }
+            codeDisplay.textContent = asphaltId;
+            
+            // Detect mobile device
+            isMobile = detectMobile();
+            
+            console.log('Mobile:', isMobile);
+            
+            checkClipboardPermission();
+            
+            // Auto-copy attempt if clipboard is available and ID is provided
+            if (asphaltId !== 'NO_ID_PROVIDED' && navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(asphaltId).then(() => {
+                    hasClipboardPermission = true;
+                    updateUI('copied');
+                }).catch(() => {
+                    updateUI('needsPermission');
+                    if (isMobile) permissionNotice.classList.add('show');
+                });
+            } else {
+                updateUI('fallback');
+                if (isMobile) permissionNotice.classList.add('show');
+            }
+        });
+
+        // Detect if device is mobile
+        function detectMobile() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/android/i.test(userAgent)) return true;
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return true;
+            if (/windows phone/i.test(userAgent)) return true;
+            if (window.innerWidth <= 768) return true;
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                if (window.innerWidth <= 1024) return true;
+            }
+            return false;
+        }
+
+        // Check clipboard permission
+        async function checkClipboardPermission() {
+            const storedPermission = localStorage.getItem('clipboardPermission');
+            if (storedPermission === 'granted') {
+                hasClipboardPermission = true;
+                updateUI('ready');
+                return true;
+            }
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const permission = await navigator.permissions.query({name: 'clipboard-write'});
+                    if (permission.state === 'granted') {
+                        hasClipboardPermission = true;
+                        localStorage.setItem('clipboardPermission', 'granted');
+                        updateUI('ready');
+                        return true;
+                    } else if (permission.state === 'prompt') {
+                        updateUI('needsPermission');
+                        return false;
+                    } else {
+                        updateUI('denied');
+                        return false;
+                    }
+                }
+            } catch (err) {
+                console.log('Permission API not supported');
+            }
+            updateUI('fallback');
+            return false;
+        }
+
+        // Request clipboard permission and copy
+        async function requestClipboardPermission() {
+            try {
+                await navigator.clipboard.writeText(asphaltId);
+                hasClipboardPermission = true;
+                localStorage.setItem('clipboardPermission', 'granted');
+                updateUI('copied');
+            } catch (err) {
+                console.log('Clipboard permission denied or failed:', err);
+                if (err.name === 'NotAllowedError') {
+                    updateUI('denied');
+                } else {
+                    updateUI('fallback');
+                }
+            }
+        }
+
+        // Select ID for manual copying
+        function selectCode() {
+            const range = document.createRange();
+            range.selectNodeContents(codeDisplay);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    updateUI('copied');
+                } else {
+                    status.innerHTML = '✋ ID selected - now press Ctrl+C (or Cmd+C on Mac)';
+                }
+            } catch (err) {
+                status.innerHTML = '✋ ID selected - now press Ctrl+C (or Cmd+C on Mac)';
+            }
+        }
+
+        // Update UI based on current state
+        function updateUI(state) {
+            permissionNotice.classList.remove('show');
+            manualSteps.classList.remove('show');
+
+            switch (state) {
+                case 'ready':
+                    status.innerHTML = '✅ Ready! Click the button to copy';
+                    copyBtn.textContent = '📋 Enable Auto-Copy';
+                    break;
+                case 'needsPermission':
+                    status.innerHTML = '👆 Click the copy button below';
+                    permissionNotice.classList.add('show');
+                    copyBtn.textContent = '📋 Enable Auto-Copy';
+                    break;
+                case 'denied':
+                    status.innerHTML = '⚠️ Auto-copy failed - use manual copy';
+                    manualSteps.classList.add('show');
+                    copyBtn.style.display = 'none';
+                    selectBtn.textContent = '📋 Copy ID';
+                    break;
+                case 'fallback':
+                    status.innerHTML = '📱 Auto-copy failed - use manual copy';
+                    manualSteps.classList.add('show');
+                    copyBtn.style.display = 'none';
+                    selectBtn.textContent = '📋 Copy ID';
+                    break;
+                case 'copied':
+                    status.innerHTML = '✅ Asphalt ID copied successfully!';
+                    copyBtn.textContent = '✅ Copied!';
+                    copyBtn.style.background = 'rgba(40, 167, 69, 0.5)';
+                    break;
+            }
+        }
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && hasClipboardPermission) {
+                status.innerHTML = '✅ Welcome back! Your ID is in your clipboard';
+            }
+        });
+    </script>
+</body>
+</html>
