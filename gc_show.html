@@ -347,7 +347,8 @@
             const codesParam = urlParams.get('codes');
             
             if (!codesParam) {
-                showNoCodes();
+                // Show demo codes or instructions when no codes provided
+                showDemoCodes();
                 return;
             }
 
@@ -357,21 +358,58 @@
                 codes = JSON.parse(decodedCodes);
                 
                 if (!Array.isArray(codes) || codes.length === 0) {
-                    showNoCodes();
+                    showDemoCodes();
                     return;
                 }
                 
                 displayCodes();
             } catch (err) {
                 console.error('Failed to parse codes:', err);
-                showNoCodes();
+                showDemoCodes();
             }
         }
 
-        // Show no codes message
-        function showNoCodes() {
-            document.getElementById('loadingContainer').style.display = 'none';
-            document.getElementById('noCodesMessage').style.display = 'block';
+        // Show demo codes when no URL parameters provided
+        function showDemoCodes() {
+            const loadingContainer = document.getElementById('loadingContainer');
+            const codesContainer = document.getElementById('codesContainer');
+            const redeemBtn = document.getElementById('redeemBtn');
+            
+            loadingContainer.style.display = 'none';
+            codesContainer.style.display = 'block';
+            redeemBtn.style.display = 'block';
+            
+            // Create demo message
+            codesContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem; background: rgba(255, 193, 7, 0.2); border: 2px solid rgba(255, 193, 7, 0.5); border-radius: 15px; margin-bottom: 1rem;">
+                    <h3 style="margin-top: 0; color: #FFD700;">📱 Mobile Gift Code Helper</h3>
+                    <p style="margin-bottom: 1rem; opacity: 0.9;">This page helps you copy gift codes on mobile devices and in Discord's browser.</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8;">To use this page, it should be opened from the Discord bot with gift codes as parameters.</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 1rem;">Use <code>/giftcode_show</code> in Discord to view available codes here.</p>
+                </div>
+                
+                <div style="text-align: center; padding: 1.5rem; background: rgba(255, 255, 255, 0.1); border-radius: 15px; margin-bottom: 1rem;">
+                    <h4 style="margin-top: 0;">🎮 How to Get Gift Codes:</h4>
+                    <div style="text-align: left; max-width: 400px; margin: 0 auto;">
+                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">1.</span>
+                            Go to your Discord server
+                        </div>
+                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">2.</span>
+                            Use <code>/giftcode_show</code> command
+                        </div>
+                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">3.</span>
+                            Click "📱 Mobile Redeem" button
+                        </div>
+                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">4.</span>
+                            Copy codes and redeem them!
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         // Display the codes
