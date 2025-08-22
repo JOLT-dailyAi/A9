@@ -48,7 +48,7 @@
             letter-spacing: 2px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
- couldnt: all 0.3s ease;
+            transition: all 0.3s ease;
             user-select: all;
         }
         .code:hover {
@@ -238,6 +238,12 @@
         <div class="code" id="codeDisplay" onclick="requestClipboardPermission()" tabindex="0" role="button" aria-label="Copy gift code">Loading...</div>
         <div class="status" id="status">👆 Tap the code above to copy</div>
         
+        <!-- Permission Notice -->
+        <div class="permission-notice" id="permissionNotice">
+            <strong>🔐 Clipboard Permission Needed</strong><br>
+            Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
+        </div>
+        
         <!-- Manual Steps for Different Browsers -->
         <div class="steps" id="manualSteps">
             <strong>🛠️ Manual Permission Steps:</strong>
@@ -249,12 +255,16 @@
 
         <!-- Action Buttons -->
         <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn" aria-label="Copy gift code to clipboard">
-            📋 Copy Code
+            📋 Enable Auto-Copy
         </button>
         
         <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn" aria-label="Select gift code manually">
             ✋ Select Code Manually
         </button>
+        
+        <a href="https://www.gameloft.com/redeem/asphalt-legends" class="btn" target="_blank" aria-label="Go to redemption page">
+            🔗 Go to Redemption Page
+        </a>
         
         <!-- Auto-redirect info (shows after successful copy in non-Discord) -->
         <div class="redirect-info" id="redirectInfo">
@@ -268,7 +278,7 @@
     <div class="modal" id="discordModal">
         <div class="modal-content">
             <h2>🤖 Discord App Detected</h2>
-            <p><span style="color: #28A745;">✅ Gift code copied!</span> You're in Discord's in-app browser. To redeem, open this link in an external browser like Chrome:</p>
+            <p><span style="color: #28A745;">✅ Gift code copied!</span> You're in Discord's in-app browser. To redeem, open this link in Chrome or your default browser:</p>
             <p><a href="https://www.gameloft.com/redeem/asphalt-legends" target="_blank">https://www.gameloft.com/redeem/asphalt-legends</a></p>
             <p><strong>Steps:</strong></p>
             <ol>
@@ -294,10 +304,13 @@
         
         const codeDisplay = document.getElementById('codeDisplay');
         const status = document.getElementById('status');
+        const permissionNotice = document.getElementById('permissionNotice');
         const manualSteps = document.getElementById('manualSteps');
         const redirectInfo = document.getElementById('redirectInfo');
         const redirectMessage = document.getElementById('redirectMessage');
         const discordModal = document.getElementById('discordModal');
+        const copyBtn = document.getElementById('copyBtn');
+        const selectBtn = document.getElementById('selectBtn');
 
         let hasClipboardPermission = false;
         let redirectTimer = null;
@@ -309,15 +322,16 @@
             if (code === 'NO_CODE_PROVIDED' || !code) {
                 codeDisplay.textContent = 'No code provided';
                 status.innerHTML = '⚠️ Please provide a valid gift code in the URL';
-                document.getElementById('copyBtn').style.display = 'none';
-                document.getElementById('selectBtn').style.display = 'none';
+                copyBtn.style.display = 'none';
+                selectBtn.style.display = 'none';
+                document.querySelector('a.btn').style.display = 'none';
                 return;
             }
             codeDisplay.textContent = code;
             
             // Detect mobile device and Discord app
             isMobile = detectMobile();
-            isInDiscordApp = isDiscordApp();
+            isInDiscordApp = detectInAppBrowser() === 'Discord';
             
             console.log('Mobile:', isMobile, 'Discord App:', isInDiscordApp);
             
@@ -331,17 +345,13 @@
                     startRedirectOrModal();
                 }).catch(() => {
                     updateUI('needsPermission');
+                    if (isMobile) permissionNotice.classList.add('show');
                 });
             } else {
                 updateUI('fallback');
+                if (isMobile) permissionNotice.classList.add('show');
             }
         });
-
-        // Detect if running in Discord app
-        function isDiscordApp() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            return /Discord|com\.discord/i.test(userAgent);
-        }
 
         // Detect if device is mobile
         function detectMobile() {
@@ -354,6 +364,13 @@
                 if (window.innerWidth <= 1024) return true;
             }
             return false;
+        }
+
+        // Detect in-app browsers
+        function detectInAppBrowser() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/Discord|com\.discord/i.test(userAgent)) return 'Discord';
+            return null;
         }
 
         // Open URL in default browser
@@ -433,34 +450,36 @@
 
         // Update UI based on current state
         function updateUI(state) {
+            permissionNotice.classList.remove('show');
             manualSteps.classList.remove('show');
             redirectInfo.classList.remove('show');
             discordModal.classList.remove('show');
 
             switch (state) {
                 case 'ready':
-                    status.innerHTML = '✅ Ready! Click the button to copy';
-                    document.getElementById('copyBtn').textContent = '📋 Copy Code';
+                    status.innerHTML = '✅ Ready! Click the code or button to copy';
+                    copyBtn.textContent = '📋 Copy Code';
                     break;
                 case 'needsPermission':
-                    status.innerHTML = '👆 Click the copy button below';
-                    document.getElementById('copyBtn').textContent = '📋 Copy Code';
+                    status.innerHTML = '🔐 Click button below to enable auto-copy';
+                    permissionNotice.classList.add('show');
+                    copyBtn.textContent = '📋 Enable Auto-Copy';
                     break;
                 case 'denied':
-                    status.innerHTML = '⚠️ Auto-copy blocked - use manual options';
+                    status.innerHTML = '⚠️ Permission denied - use manual copy options';
                     manualSteps.classList.add('show');
-                    document.getElementById('copyBtn').style.display = 'none';
-                    document.getElementById('selectBtn').textContent = '✋ Select & Copy Code';
+                    copyBtn.style.display = 'none';
+                    selectBtn.textContent = '✋ Select & Copy Code';
                     break;
                 case 'fallback':
                     status.innerHTML = '📱 Use manual copy options below';
                     manualSteps.classList.add('show');
-                    document.getElementById('copyBtn').style.display = 'none';
+                    copyBtn.style.display = 'none';
                     break;
                 case 'copied':
-                    status.innerHTML = '✅ Code copied! Redirecting to redeem page...';
-                    document.getElementById('copyBtn').textContent = '✅ Copied!';
-                    document.getElementById('copyBtn').style.background = 'rgba(40, 167, 69, 0.5)';
+                    status.innerHTML = '✅ Code copied to clipboard!';
+                    copyBtn.textContent = '✅ Copied!';
+                    copyBtn.style.background = 'rgba(40, 167, 69, 0.5)';
                     break;
             }
         }
@@ -474,6 +493,7 @@
             redirectInfo.classList.add('show');
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
+            redirectMessage.innerHTML = `Redirecting to redemption page in <span class="countdown" id="countdown">${countdown}</span> seconds`;
             redirectTimer = setInterval(() => {
                 countdown--;
                 countdownEl.textContent = countdown;
