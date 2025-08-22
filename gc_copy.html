@@ -166,27 +166,68 @@
             font-weight: 700;
             color: #FFD700;
         }
-        .mobile-notice {
-            background: rgba(0, 123, 255, 0.2);
-            border: 2px solid rgba(0, 123, 255, 0.5);
-            padding: 1rem;
-            border-radius: 12px;
-            margin: 1rem 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
+        .modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-        .mobile-notice.show {
-            display: block;
-            animation: slideIn 0.3s ease;
+        .modal.show {
+            display: flex;
         }
-        #discordNotice {
-            background: rgba(88, 101, 242, 0.3) !important;
-            border: 2px solid rgba(88, 101, 242, 0.8) !important;
-            display: none !important;
+        .modal-content {
+            background: rgba(88, 101, 242, 0.3);
+            border: 2px solid rgba(88, 101, 242, 0.8);
+            padding: 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            max-width: 400px;
+            width: 90%;
+            text-align: left;
         }
-        #discordNotice.show {
-            display: block !important;
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: #FFD700;
+        }
+        .modal-content p {
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+        .modal-content a {
+            color: #FFD700;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        .modal-content .btn {
+            width: 100%;
+            text-align: center;
+        }
+        .modal-content .menu-instruction {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        @media (max-width: 400px) {
+            .modal-content {
+                padding: 1.5rem;
+            }
+            .modal-content .menu-instruction {
+                flex-direction: column;
+                text-align: center;
+            }
+            .modal-content .menu-instruction > div:last-child {
+                margin-top: 1rem;
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -194,8 +235,14 @@
     <div class="container">
         <div class="logo">📋</div>
         <div class="title">Copy Asphalt Legends Giftcode</div>
-        <div class="code" id="codeDisplay" onclick="requestClipboardPermission()">Loading...</div>
+        <div class="code" id="codeDisplay" onclick="requestClipboardPermission()" tabindex="0" role="button" aria-label="Copy gift code">Loading...</div>
         <div class="status" id="status">👆 Tap the code above to copy</div>
+        
+        <!-- Permission Notice -->
+        <div class="permission-notice" id="permissionNotice">
+            <strong>🔐 Clipboard Permission Needed</strong><br>
+            Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
+        </div>
         
         <!-- Manual Steps for Different Browsers -->
         <div class="steps" id="manualSteps">
@@ -204,38 +251,47 @@
             <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
             <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
             <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
-            <div class="step"><strong>Discord/In-App:</strong> Copy the URL manually: https://www.gameloft.com/redeem/asphalt-legends</div>
-        </div>
-        <div class="steps" id="manualSteps">
-            <strong>🛠️ Manual Permission Steps:</strong>
-            <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
-            <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
-            <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
-            <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
+            <div class="step"><strong>Discord/In-App:</strong> Copy the URL manually: <a href="https://www.gameloft.com/redeem/asphalt-legends" target="_blank">https://www.gameloft.com/redeem/asphalt-legends</a></div>
         </div>
 
         <!-- Action Buttons -->
-        <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn">
+        <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn" aria-label="Copy gift code to clipboard">
             📋 Enable Auto-Copy
         </button>
         
-        <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn">
+        <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn" aria-label="Select gift code manually">
             📋 Copy Code
         </button>
         
-        <!-- Auto-redirect info (shows after successful copy) -->
+        <!-- Auto-redirect info (shows after successful copy in non-Discord) -->
         <div class="redirect-info" id="redirectInfo">
             <p id="redirectMessage">Redirecting to redemption page in <span class="countdown" id="countdown">5</span> seconds</p>
             <div class="spinner" id="spinner"></div>
+            <button class="btn" onclick="redirectNow()" style="margin-top: 1rem;" aria-label="Go to redemption page now">🚀 Go Now</button>
         </div>
-        
-        <!-- Discord app notice -->
-        <div class="mobile-notice" id="discordNotice" style="display: none;">
-            <div style="text-align: center;">
-                <strong>✅ Code Copied Successfully!</strong><br>
-                <span style="font-size: 0.9rem;">Please open redemption site in external browser</span><br>
-                <span style="font-size: 0.85rem; opacity: 0.9;">Tap menu (⋯) → "Open in Browser"</span>
+    </div>
+
+    <!-- Modal for Discord users -->
+    <div class="modal" id="discordModal">
+        <div class="modal-content">
+            <h2>🤖 Discord App Detected</h2>
+            <p><strong>✅ Code Copied Successfully!</strong></p>
+            <p>Please open the redemption site in an external browser like Chrome:</p>
+            <p><a href="https://www.gameloft.com/redeem/asphalt-legends" target="_blank">https://www.gameloft.com/redeem/asphalt-legends</a></p>
+            <p><strong>Steps:</strong></p>
+            <ol>
+                <li>Tap the menu (⋯) in the bottom-right corner of Discord.</li>
+                <li>Select "Open in Browser" to open in Chrome or your default browser.</li>
+                <li>Paste the gift code there to redeem.</li>
+            </ol>
+            <div class="menu-instruction">
+                <div>Tap the menu to open in Chrome:</div>
+                <div style="display: flex; flex-direction: column; align-items: center; margin-left: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">↗️</div>
+                    <div style="font-size: 0.8rem; text-align: center;">Tap here<br>for menu</div>
+                </div>
             </div>
+            <button class="btn btn-secondary" onclick="closeModal()" aria-label="Close modal">Close</button>
         </div>
     </div>
 
@@ -246,10 +302,11 @@
         
         const codeDisplay = document.getElementById('codeDisplay');
         const status = document.getElementById('status');
+        const permissionNotice = document.getElementById('permissionNotice');
         const manualSteps = document.getElementById('manualSteps');
         const redirectInfo = document.getElementById('redirectInfo');
         const redirectMessage = document.getElementById('redirectMessage');
-        const discordNotice = document.getElementById('discordNotice');
+        const discordModal = document.getElementById('discordModal');
         const copyBtn = document.getElementById('copyBtn');
         const selectBtn = document.getElementById('selectBtn');
 
@@ -258,49 +315,79 @@
         let isMobile = false;
         let isInDiscordApp = false;
 
-        // Display the code immediately
-        codeDisplay.textContent = code;
-
-        // Detect if running in Discord app
-        function isDiscordApp() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            return userAgent.includes('Discord');
-        }
+        // Display the code immediately or handle missing code
+        window.addEventListener('load', () => {
+            if (code === 'NO_CODE_PROVIDED' || !code) {
+                codeDisplay.textContent = 'No code provided';
+                status.innerHTML = '⚠️ Please provide a valid gift code in the URL';
+                copyBtn.style.display = 'none';
+                selectBtn.style.display = 'none';
+                return;
+            }
+            codeDisplay.textContent = code;
+            
+            // Detect mobile device and Discord app
+            isMobile = detectMobile();
+            isInDiscordApp = isDiscordApp();
+            
+            console.log('Mobile:', isMobile, 'Discord App:', isInDiscordApp);
+            
+            checkClipboardPermission();
+            
+            // Auto-copy attempt if clipboard is available and code is provided
+            if (code !== 'NO_CODE_PROVIDED' && navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(code).then(() => {
+                    hasClipboardPermission = true;
+                    updateUI('copied');
+                    startRedirectOrModal();
+                }).catch(() => {
+                    updateUI('needsPermission');
+                    if (isMobile) permissionNotice.classList.add('show');
+                });
+            } else {
+                updateUI('fallback');
+                if (isMobile) permissionNotice.classList.add('show');
+            }
+        });
 
         // Detect if device is mobile
         function detectMobile() {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            
-            // Check for mobile devices
             if (/android/i.test(userAgent)) return true;
             if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return true;
             if (/windows phone/i.test(userAgent)) return true;
-            
-            // Check for tablet/mobile screen size
             if (window.innerWidth <= 768) return true;
-            
-            // Check for touch support
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-                // Additional mobile indicators
                 if (window.innerWidth <= 1024) return true;
             }
-            
             return false;
         }
 
-        // Open URL - simple approach that triggers system browser selector
+        // Detect if running in Discord app
+        function isDiscordApp() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            return /Discord|com\.discord/i.test(userAgent);
+        }
+
+        // Open URL in default browser
         function openInDefaultBrowser(url) {
-            // Simple direct navigation - let the system handle browser selection
             window.location.href = url;
         }
 
-        // Check clipboard permission on load
+        // Check clipboard permission
         async function checkClipboardPermission() {
+            const storedPermission = localStorage.getItem('clipboardPermission');
+            if (storedPermission === 'granted') {
+                hasClipboardPermission = true;
+                updateUI('ready');
+                return true;
+            }
             try {
                 if (navigator.permissions && navigator.permissions.query) {
                     const permission = await navigator.permissions.query({name: 'clipboard-write'});
                     if (permission.state === 'granted') {
                         hasClipboardPermission = true;
+                        localStorage.setItem('clipboardPermission', 'granted');
                         updateUI('ready');
                         return true;
                     } else if (permission.state === 'prompt') {
@@ -314,33 +401,21 @@
             } catch (err) {
                 console.log('Permission API not supported');
             }
-            
-            // Fallback: Try clipboard API directly
-            if (navigator.clipboard && window.isSecureContext) {
-                updateUI('needsPermission');
-                return false;
-            } else {
-                updateUI('fallback');
-                return false;
-            }
+            updateUI('fallback');
+            return false;
         }
 
         // Request clipboard permission and copy
         async function requestClipboardPermission() {
             try {
-                status.innerHTML = '🔄 Requesting clipboard permission...';
-                
-                // Try to write to clipboard - this will trigger permission prompt
+                // Removed "Requesting clipboard permission..." message
                 await navigator.clipboard.writeText(code);
-                
-                // If we get here, permission was granted
                 hasClipboardPermission = true;
+                localStorage.setItem('clipboardPermission', 'granted');
                 updateUI('copied');
-                startRedirectCountdown();
-                
+                startRedirectOrModal();
             } catch (err) {
                 console.log('Clipboard permission denied or failed:', err);
-                
                 if (err.name === 'NotAllowedError') {
                     updateUI('denied');
                 } else {
@@ -356,13 +431,11 @@
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
-            
-            // Try execCommand as fallback
             try {
                 const success = document.execCommand('copy');
                 if (success) {
                     updateUI('copied');
-                    startRedirectCountdown();
+                    startRedirectOrModal();
                 } else {
                     status.innerHTML = '✋ Code selected - now press Ctrl+C (or Cmd+C on Mac)';
                 }
@@ -373,57 +446,52 @@
 
         // Update UI based on current state
         function updateUI(state) {
+            permissionNotice.classList.remove('show');
             manualSteps.classList.remove('show');
             redirectInfo.classList.remove('show');
-            discordNotice.style.display = 'none';
+            discordModal.classList.remove('show');
 
             switch (state) {
                 case 'ready':
                     status.innerHTML = '✅ Ready! Click the button to copy';
                     copyBtn.textContent = '📋 Enable Auto-Copy';
                     break;
-                    
                 case 'needsPermission':
                     status.innerHTML = '👆 Click the copy button below';
+                    permissionNotice.classList.add('show');
                     copyBtn.textContent = '📋 Enable Auto-Copy';
                     break;
-                    
                 case 'denied':
                     status.innerHTML = '⚠️ Auto-copy failed - use manual copy';
                     manualSteps.classList.add('show');
                     copyBtn.style.display = 'none';
                     selectBtn.textContent = '📋 Copy Code';
                     break;
-                    
                 case 'fallback':
                     status.innerHTML = '📱 Auto-copy failed - use manual copy';
                     manualSteps.classList.add('show');
                     copyBtn.style.display = 'none';
                     selectBtn.textContent = '📋 Copy Code';
                     break;
-                    
                 case 'copied':
+                    status.innerHTML = '✅ Code copied successfully!';
                     copyBtn.textContent = '✅ Copied!';
                     copyBtn.style.background = 'rgba(40, 167, 69, 0.5)';
-                    
-                    // Don't set status here - let startRedirectCountdown handle it
                     break;
             }
         }
 
-        // Start redirect countdown
-        function startRedirectCountdown() {
-            // Don't redirect if in Discord app - just show the notice
+        // Start redirect or show modal for Discord users
+        function startRedirectOrModal() {
             if (isInDiscordApp) {
-                discordNotice.style.display = 'block';
-                status.innerHTML = '✅ Code copied successfully!';
+                console.log('Discord detected - showing modal');
+                discordModal.classList.add('show');
                 return;
             }
-            
             redirectInfo.classList.add('show');
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
-            
+            redirectMessage.innerHTML = `Redirecting to redemption page in <span class="countdown" id="countdown">${countdown}</span> seconds`;
             redirectTimer = setInterval(() => {
                 countdown--;
                 countdownEl.textContent = countdown;
@@ -444,6 +512,12 @@
         function redirectNow() {
             if (redirectTimer) clearInterval(redirectTimer);
             redirectToSite();
+            document.querySelector('.btn[onclick="redirectNow()"]').disabled = true;
+        }
+
+        // Close modal
+        function closeModal() {
+            discordModal.classList.remove('show');
         }
 
         // Initialize on page load
@@ -458,25 +532,27 @@
             
             // Auto-copy attempt if clipboard is available and code is provided
             if (code !== 'NO_CODE_PROVIDED' && navigator.clipboard && window.isSecureContext) {
-                // Try auto-copy immediately (but silently)
                 navigator.clipboard.writeText(code).then(() => {
                     hasClipboardPermission = true;
                     updateUI('copied');
-                    startRedirectCountdown();
+                    startRedirectOrModal();
                 }).catch(() => {
-                    // If auto-copy fails, show normal interface
                     updateUI('needsPermission');
+                    if (isMobile) permissionNotice.classList.add('show');
                 });
             } else {
-                // No clipboard support, show fallback options
                 updateUI('fallback');
+                if (isMobile) permissionNotice.classList.add('show');
             }
         });
 
-        // Handle page visibility changes (mobile app switching)
+        // Handle page visibility changes
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && hasClipboardPermission) {
                 status.innerHTML = '✅ Welcome back! Code is in your clipboard';
+                if (isInDiscordApp) {
+                    discordModal.classList.add('show');
+                }
             }
         });
     </script>
