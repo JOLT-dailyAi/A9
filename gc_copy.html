@@ -221,6 +221,21 @@
             <div class="spinner" id="spinner"></div>
             <button class="btn" onclick="redirectNow()" style="margin-top: 1rem;">🚀 Go Now</button>
         </div>
+        
+        <!-- Discord app notice -->
+        <div class="mobile-notice" id="discordNotice" style="display: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <strong>🤖 Discord App Detected</strong><br>
+                    Open in external browser to redeem<br>
+                    <code style="font-size: 0.85em;">https://www.gameloft.com/redeem/asphalt-legends</code>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; margin-left: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">↗️</div>
+                    <div style="font-size: 0.8rem; text-align: center;">Tap here<br>for menu</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -233,15 +248,23 @@
         const manualSteps = document.getElementById('manualSteps');
         const redirectInfo = document.getElementById('redirectInfo');
         const redirectMessage = document.getElementById('redirectMessage');
+        const discordNotice = document.getElementById('discordNotice');
         const copyBtn = document.getElementById('copyBtn');
         const selectBtn = document.getElementById('selectBtn');
 
         let hasClipboardPermission = false;
         let redirectTimer = null;
         let isMobile = false;
+        let isInDiscordApp = false;
 
         // Display the code immediately
         codeDisplay.textContent = code;
+
+        // Detect if running in Discord app
+        function isDiscordApp() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            return userAgent.includes('Discord');
+        }
 
         // Detect if device is mobile
         function detectMobile() {
@@ -386,6 +409,12 @@
 
         // Start redirect countdown
         function startRedirectCountdown() {
+            // Don't redirect if in Discord app - just show the notice
+            if (isInDiscordApp) {
+                discordNotice.style.display = 'block';
+                return;
+            }
+            
             redirectInfo.classList.add('show');
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
@@ -414,8 +443,11 @@
 
         // Initialize on page load
         window.addEventListener('load', () => {
-            // Detect mobile device
+            // Detect mobile device and Discord app
             isMobile = detectMobile();
+            isInDiscordApp = isDiscordApp();
+            
+            console.log('Mobile:', isMobile, 'Discord App:', isInDiscordApp);
             
             checkClipboardPermission();
             
