@@ -189,19 +189,15 @@
         <div class="code" id="codeDisplay" onclick="requestClipboardPermission()">Loading...</div>
         <div class="status" id="status">👆 Tap the code above to copy</div>
         
-        <!-- Permission Notice -->
-        <div class="permission-notice" id="permissionNotice">
-            <strong>🔐 Clipboard Permission Needed</strong><br>
-            Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
-        </div>
-        
-        <!-- Mobile Notice -->
-        <div class="mobile-notice" id="mobileNotice">
-            <strong>📱 Mobile Device Detected</strong><br>
-            <span id="inAppWarning">After copying, we'll open the redemption page in your default browser automatically!</span>
-        </div>
-        
         <!-- Manual Steps for Different Browsers -->
+        <div class="steps" id="manualSteps">
+            <strong>🛠️ Manual Permission Steps:</strong>
+            <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
+            <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
+            <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
+            <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
+            <div class="step"><strong>Discord/In-App:</strong> Copy the URL manually: https://www.gameloft.com/redeem/asphalt-legends</div>
+        </div>
         <div class="steps" id="manualSteps">
             <strong>🛠️ Manual Permission Steps:</strong>
             <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
@@ -212,16 +208,12 @@
 
         <!-- Action Buttons -->
         <button class="btn btn-primary" onclick="requestClipboardPermission()" id="copyBtn">
-            📋 Enable Auto-Copy
+            📋 Copy Code
         </button>
         
         <button class="btn btn-secondary" onclick="selectCode()" id="selectBtn">
             ✋ Select Code Manually
         </button>
-        
-        <a href="https://www.gameloft.com/redeem/asphalt-legends" class="btn">
-            🔗 Go to Redemption Page
-        </a>
         
         <!-- Auto-redirect info (shows after successful copy) -->
         <div class="redirect-info" id="redirectInfo">
@@ -238,8 +230,6 @@
         
         const codeDisplay = document.getElementById('codeDisplay');
         const status = document.getElementById('status');
-        const permissionNotice = document.getElementById('permissionNotice');
-        const mobileNotice = document.getElementById('mobileNotice');
         const manualSteps = document.getElementById('manualSteps');
         const redirectInfo = document.getElementById('redirectInfo');
         const redirectMessage = document.getElementById('redirectMessage');
@@ -274,104 +264,10 @@
             return false;
         }
 
-        // Detect in-app browsers
-        function detectInAppBrowser() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            
-            // Common in-app browsers
-            if (userAgent.includes('FBAN') || userAgent.includes('FBAV')) return 'Facebook';
-            if (userAgent.includes('Instagram')) return 'Instagram';
-            if (userAgent.includes('Twitter')) return 'Twitter';
-            if (userAgent.includes('LinkedInApp')) return 'LinkedIn';
-            if (userAgent.includes('WhatsApp')) return 'WhatsApp';
-            if (userAgent.includes('Snapchat')) return 'Snapchat';
-            if (userAgent.includes('TikTok')) return 'TikTok';
-            if (userAgent.includes('Discord')) return 'Discord';
-            if (userAgent.includes('Telegram')) return 'Telegram';
-            if (userAgent.includes('Line')) return 'Line';
-            
-            return null;
-        }
-
-        // Open URL in mobile's default browser
+        // Open URL - simple approach that triggers system browser selector
         function openInDefaultBrowser(url) {
-            const inAppBrowser = detectInAppBrowser();
-            
-            if (isMobile) {
-                // Method 1: Try multiple aggressive approaches for in-app browsers
-                if (inAppBrowser) {
-                    console.log(`Detected ${inAppBrowser} in-app browser`);
-                    
-                    // Try intent URLs for Android
-                    if (/android/i.test(navigator.userAgent)) {
-                        const intentUrl = `intent://${url.replace(/https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
-                        window.location.href = intentUrl;
-                        
-                        // Fallback after delay
-                        setTimeout(() => {
-                            window.location.href = url;
-                        }, 500);
-                        return;
-                    }
-                    
-                    // Try iOS Universal Links approach
-                    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                        // Try to trigger Safari
-                        window.location.href = `x-web-search://?${url}`;
-                        
-                        setTimeout(() => {
-                            window.location.href = url;
-                        }, 500);
-                        return;
-                    }
-                }
-                
-                // Method 2: Create multiple link attempts with different strategies
-                const strategies = [
-                    () => {
-                        // Strategy 1: Direct location change
-                        window.location.href = url;
-                    },
-                    () => {
-                        // Strategy 2: New window with specific features
-                        window.open(url, '_blank', 'location=yes,height=800,width=600,scrollbars=yes,status=yes');
-                    },
-                    () => {
-                        // Strategy 3: Create and click link
-                        const tempLink = document.createElement('a');
-                        tempLink.href = url;
-                        tempLink.target = '_system'; // PhoneGap/Cordova hint
-                        tempLink.rel = 'external'; // Additional hint
-                        document.body.appendChild(tempLink);
-                        
-                        // Force click event
-                        const clickEvent = new MouseEvent('click', {
-                            view: window,
-                            bubbles: true,
-                            cancelable: true
-                        });
-                        tempLink.dispatchEvent(clickEvent);
-                        document.body.removeChild(tempLink);
-                    },
-                    () => {
-                        // Strategy 4: Try to break out with top window
-                        if (window.top !== window.self) {
-                            window.top.location.href = url;
-                        } else {
-                            window.location.replace(url);
-                        }
-                    }
-                ];
-                
-                // Execute strategies with delays
-                strategies.forEach((strategy, index) => {
-                    setTimeout(strategy, index * 200);
-                });
-                
-            } else {
-                // For desktop, normal redirect
-                window.location.href = url;
-            }
+            // Simple direct navigation - let the system handle browser selection
+            window.location.href = url;
         }
 
         // Check clipboard permission on load
@@ -453,29 +349,23 @@
 
         // Update UI based on current state
         function updateUI(state) {
-            permissionNotice.classList.remove('show');
-            mobileNotice.classList.remove('show');
             manualSteps.classList.remove('show');
             redirectInfo.classList.remove('show');
 
             switch (state) {
                 case 'ready':
-                    status.innerHTML = '✅ Ready! Click the code or button to copy';
+                    status.innerHTML = '✅ Ready! Click the button to copy';
                     copyBtn.textContent = '📋 Copy Code';
-                    if (isMobile) mobileNotice.classList.add('show');
                     break;
                     
                 case 'needsPermission':
-                    status.innerHTML = '🔐 Click button below to enable auto-copy';
-                    permissionNotice.classList.add('show');
-                    if (isMobile) mobileNotice.classList.add('show');
-                    copyBtn.textContent = '📋 Enable Auto-Copy';
+                    status.innerHTML = '👆 Click the copy button below';
+                    copyBtn.textContent = '📋 Copy Code';
                     break;
                     
                 case 'denied':
-                    status.innerHTML = '⚠️ Permission denied - use manual copy options';
+                    status.innerHTML = '⚠️ Auto-copy blocked - use manual options';
                     manualSteps.classList.add('show');
-                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.style.display = 'none';
                     selectBtn.textContent = '✋ Select & Copy Code';
                     break;
@@ -483,12 +373,11 @@
                 case 'fallback':
                     status.innerHTML = '📱 Use manual copy options below';
                     manualSteps.classList.add('show');
-                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.style.display = 'none';
                     break;
                     
                 case 'copied':
-                    status.innerHTML = '✅ Code copied to clipboard!';
+                    status.innerHTML = '✅ Code copied! Redirecting to redeem page...';
                     copyBtn.textContent = '✅ Copied!';
                     copyBtn.style.background = 'rgba(40, 167, 69, 0.5)';
                     break;
@@ -500,11 +389,6 @@
             redirectInfo.classList.add('show');
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
-            
-            // Update message for mobile
-            if (isMobile) {
-                redirectMessage.innerHTML = `Opening redemption page in default browser in <span class="countdown" id="countdown">${countdown}</span> seconds`;
-            }
             
             redirectTimer = setInterval(() => {
                 countdown--;
@@ -519,12 +403,7 @@
         // Redirect to redemption site
         function redirectToSite() {
             const url = 'https://www.gameloft.com/redeem/asphalt-legends';
-            
-            if (isMobile) {
-                openInDefaultBrowser(url);
-            } else {
-                window.location.href = url;
-            }
+            openInDefaultBrowser(url);
         }
 
         // Redirect immediately
@@ -537,27 +416,23 @@
         window.addEventListener('load', () => {
             // Detect mobile device
             isMobile = detectMobile();
-            const inAppBrowser = detectInAppBrowser();
-            
-            console.log('Mobile device detected:', isMobile);
-            console.log('In-app browser detected:', inAppBrowser);
-            
-            // Update mobile notice if in-app browser detected
-            if (inAppBrowser) {
-                const inAppWarning = document.getElementById('inAppWarning');
-                inAppWarning.innerHTML = `🔴 <strong>${inAppBrowser} in-app browser detected!</strong><br>We'll try multiple methods to open in your default browser. You may need to manually copy the URL: <br><code style="font-size:0.8em;">https://www.gameloft.com/redeem/asphalt-legends</code>`;
-            }
             
             checkClipboardPermission();
             
-            // Auto-request permission if code is provided and browser supports it
+            // Auto-copy attempt if clipboard is available and code is provided
             if (code !== 'NO_CODE_PROVIDED' && navigator.clipboard && window.isSecureContext) {
-                setTimeout(() => {
-                    if (!hasClipboardPermission) {
-                        permissionNotice.classList.add('show');
-                        if (isMobile) mobileNotice.classList.add('show');
-                    }
-                }, 1000);
+                // Try auto-copy immediately (but silently)
+                navigator.clipboard.writeText(code).then(() => {
+                    hasClipboardPermission = true;
+                    updateUI('copied');
+                    startRedirectCountdown();
+                }).catch(() => {
+                    // If auto-copy fails, show normal interface
+                    updateUI('needsPermission');
+                });
+            } else {
+                // No clipboard support, show fallback options
+                updateUI('fallback');
             }
         });
 
