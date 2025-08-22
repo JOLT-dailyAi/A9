@@ -166,6 +166,20 @@
             font-weight: 700;
             color: #FFD700;
         }
+        .mobile-notice {
+            background: rgba(0, 123, 255, 0.2);
+            border: 2px solid rgba(0, 123, 255, 0.5);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+        }
+        .mobile-notice.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -181,12 +195,18 @@
             Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
         </div>
         
+        <!-- Mobile Notice -->
+        <div class="mobile-notice" id="mobileNotice">
+            <strong>📱 Mobile Device Detected</strong><br>
+            After copying, we'll open the redemption page in your default browser automatically!
+        </div>
+        
         <!-- Manual Steps for Different Browsers -->
         <div class="steps" id="manualSteps">
             <strong>🛠️ Manual Permission Steps:</strong>
             <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
             <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
-            <div class="step"><strong>Safari:</strong> Settings → Websites → Allow clipboard access</div>
+            <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
             <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
         </div>
 
@@ -205,7 +225,7 @@
         
         <!-- Auto-redirect info (shows after successful copy) -->
         <div class="redirect-info" id="redirectInfo">
-            <p>Redirecting to redemption page in <span class="countdown" id="countdown">5</span> seconds</p>
+            <p id="redirectMessage">Redirecting to redemption page in <span class="countdown" id="countdown">5</span> seconds</p>
             <div class="spinner" id="spinner"></div>
             <button class="btn" onclick="redirectNow()" style="margin-top: 1rem;">🚀 Go Now</button>
         </div>
@@ -219,16 +239,65 @@
         const codeDisplay = document.getElementById('codeDisplay');
         const status = document.getElementById('status');
         const permissionNotice = document.getElementById('permissionNotice');
+        const mobileNotice = document.getElementById('mobileNotice');
         const manualSteps = document.getElementById('manualSteps');
         const redirectInfo = document.getElementById('redirectInfo');
+        const redirectMessage = document.getElementById('redirectMessage');
         const copyBtn = document.getElementById('copyBtn');
         const selectBtn = document.getElementById('selectBtn');
 
         let hasClipboardPermission = false;
         let redirectTimer = null;
+        let isMobile = false;
 
         // Display the code immediately
         codeDisplay.textContent = code;
+
+        // Detect if device is mobile
+        function detectMobile() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Check for mobile devices
+            if (/android/i.test(userAgent)) return true;
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) return true;
+            if (/windows phone/i.test(userAgent)) return true;
+            
+            // Check for tablet/mobile screen size
+            if (window.innerWidth <= 768) return true;
+            
+            // Check for touch support
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                // Additional mobile indicators
+                if (window.innerWidth <= 1024) return true;
+            }
+            
+            return false;
+        }
+
+        // Open URL in mobile's default browser
+        function openInDefaultBrowser(url) {
+            if (isMobile) {
+                // For mobile devices, try to force opening in default browser
+                // Create a temporary link and click it
+                const tempLink = document.createElement('a');
+                tempLink.href = url;
+                tempLink.target = '_blank';
+                tempLink.rel = 'noopener noreferrer';
+                
+                // Add to DOM temporarily
+                document.body.appendChild(tempLink);
+                tempLink.click();
+                document.body.removeChild(tempLink);
+                
+                // Additional attempt for better mobile support
+                setTimeout(() => {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }, 100);
+            } else {
+                // For desktop, normal redirect
+                window.location.href = url;
+            }
+        }
 
         // Check clipboard permission on load
         async function checkClipboardPermission() {
@@ -310,6 +379,7 @@
         // Update UI based on current state
         function updateUI(state) {
             permissionNotice.classList.remove('show');
+            mobileNotice.classList.remove('show');
             manualSteps.classList.remove('show');
             redirectInfo.classList.remove('show');
 
@@ -317,17 +387,20 @@
                 case 'ready':
                     status.innerHTML = '✅ Ready! Click the code or button to copy';
                     copyBtn.textContent = '📋 Copy Code';
+                    if (isMobile) mobileNotice.classList.add('show');
                     break;
                     
                 case 'needsPermission':
                     status.innerHTML = '🔐 Click button below to enable auto-copy';
                     permissionNotice.classList.add('show');
+                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.textContent = '📋 Enable Auto-Copy';
                     break;
                     
                 case 'denied':
                     status.innerHTML = '⚠️ Permission denied - use manual copy options';
                     manualSteps.classList.add('show');
+                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.style.display = 'none';
                     selectBtn.textContent = '✋ Select & Copy Code';
                     break;
@@ -335,6 +408,7 @@
                 case 'fallback':
                     status.innerHTML = '📱 Use manual copy options below';
                     manualSteps.classList.add('show');
+                    if (isMobile) mobileNotice.classList.add('show');
                     copyBtn.style.display = 'none';
                     break;
                     
@@ -352,6 +426,11 @@
             let countdown = 5;
             const countdownEl = document.getElementById('countdown');
             
+            // Update message for mobile
+            if (isMobile) {
+                redirectMessage.innerHTML = `Opening redemption page in default browser in <span class="countdown" id="countdown">${countdown}</span> seconds`;
+            }
+            
             redirectTimer = setInterval(() => {
                 countdown--;
                 countdownEl.textContent = countdown;
@@ -364,7 +443,13 @@
 
         // Redirect to redemption site
         function redirectToSite() {
-            window.location.href = 'https://www.gameloft.com/redeem/asphalt-legends';
+            const url = 'https://www.gameloft.com/redeem/asphalt-legends';
+            
+            if (isMobile) {
+                openInDefaultBrowser(url);
+            } else {
+                window.location.href = url;
+            }
         }
 
         // Redirect immediately
@@ -375,6 +460,10 @@
 
         // Initialize on page load
         window.addEventListener('load', () => {
+            // Detect mobile device
+            isMobile = detectMobile();
+            console.log('Mobile device detected:', isMobile);
+            
             checkClipboardPermission();
             
             // Auto-request permission if code is provided and browser supports it
@@ -382,6 +471,7 @@
                 setTimeout(() => {
                     if (!hasClipboardPermission) {
                         permissionNotice.classList.add('show');
+                        if (isMobile) mobileNotice.classList.add('show');
                     }
                 }, 1000);
             }
