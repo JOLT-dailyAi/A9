@@ -1,0 +1,613 @@
+try {
+                // Send data back to Discord bot via webhook or API endpoint
+                const payload = {
+                    giftcode: giftcode,
+                    redeemedIds: redeemedIds,
+                    sessionId: sessionId,
+                    timestamp: Date.now()
+                };
+
+                // Try multiple endpoints for better reliability
+                const endpoints = [
+                    'https://your-bot-webhook.com/redeem-callback',
+                    '/api/redeem-callback',
+                    // Add your actual webhook URL here
+                ];
+
+                let success = false;
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            success = true;
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`Failed to reach ${endpoint}:`, e);
+                        continue;
+                    }
+                }
+
+                if (success) {
+                    showToast(`✅ Confirmed redemption for ${redeemedIds.length} player(s)`);
+                    
+                    // Reset checkboxes
+                    checkboxes.forEach(cb => cb.checked = false);<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A9 - Bulk Redeem Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .redeem-button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .redeem-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
+        }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .giftcode-display {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .giftcode-display:hover {
+            background: #34495e;
+            transform: scale(1.02);
+        }
+
+        .copy-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .copy-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #27ae60;
+        }
+
+        .player-ids-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .player-ids-table th,
+        .player-ids-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .player-ids-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .player-ids-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .player-id {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 8px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .player-id:hover {
+            background: #bdc3c7;
+            transform: scale(1.05);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            transform: scale(1.5);
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .player-ids-table th,
+            .player-ids-table td {
+                padding: 10px 8px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Asphalt 9 - Bulk Redeem Tool</h1>
+            <p>Redeem giftcodes for multiple players efficiently</p>
+        </div>
+        
+        <div class="content">
+            <!-- Official Redeem Button -->
+            <a href="https://www.gameloft.com/redeem/asphalt-legends" 
+               target="_blank" 
+               class="redeem-button">
+                🚀 Redeem at Official Gameloft Site
+            </a>
+
+            <!-- Giftcode Section -->
+            <div class="section">
+                <h3>🎫 Giftcode</h3>
+                <div id="giftcodeDisplay" class="giftcode-display">
+                    <span id="giftcodeText">Loading...</span>
+                </div>
+                <div style="text-align: center;">
+                    <button class="copy-btn" onclick="copyGiftcode()">📋 Copy Code</button>
+                </div>
+            </div>
+
+            <!-- Player IDs Section -->
+            <div class="section">
+                <h3>👥 Player IDs</h3>
+                <div id="playerIdsContainer">
+                    <div class="no-data">No player IDs provided</div>
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <button class="submit-btn" id="submitBtn" onclick="submitRedemption()" disabled>
+                    ✅ Confirm Redemptions
+                </button>
+                <p style="margin-top: 15px; color: #7f8c8d; font-style: italic;">
+                    Check the boxes next to Player IDs you have successfully redeemed
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let giftcode = '';
+        let playerIds = [];
+        let sessionId = '';
+
+        // Parse URL parameters
+        function parseURLParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            giftcode = urlParams.get('gc') || '';
+            const idsParam = urlParams.get('ids') || '';
+            sessionId = urlParams.get('session') || '';
+            playerIds = idsParam ? idsParam.split(',') : [];
+
+            displayGiftcode();
+            displayPlayerIds();
+            
+            // Show session info if available
+            if (sessionId) {
+                console.log('Session ID:', sessionId);
+            }
+        }
+
+        // Display giftcode
+        function displayGiftcode() {
+            const giftcodeText = document.getElementById('giftcodeText');
+            if (giftcode) {
+                giftcodeText.textContent = giftcode;
+            } else {
+                giftcodeText.textContent = 'No giftcode provided';
+            }
+        }
+
+        // Display player IDs table
+        function displayPlayerIds() {
+            const container = document.getElementById('playerIdsContainer');
+            
+            if (playerIds.length === 0) {
+                container.innerHTML = '<div class="no-data">No player IDs provided</div>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'player-ids-table';
+            
+            // Table header
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Player ID</th>
+                        <th>Actions</th>
+                        <th>Redeemed?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${playerIds.map((id, index) => `
+                        <tr>
+                            <td>
+                                <span class="player-id" onclick="copyPlayerId('${id}')" title="Click to copy">
+                                    ${id}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="copy-btn" onclick="copyPlayerId('${id}')">📋 Copy</button>
+                            </td>
+                            <td>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" 
+                                           id="checkbox-${index}" 
+                                           onchange="updateSubmitButton()"
+                                           title="Check if you have redeemed for this player">
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(table);
+            
+            updateSubmitButton();
+        }
+
+        // Copy giftcode to clipboard
+        function copyGiftcode() {
+            if (navigator.clipboard && giftcode) {
+                navigator.clipboard.writeText(giftcode).then(() => {
+                    showToast('Giftcode copied to clipboard!');
+                });
+            }
+        }
+
+        // Copy player ID to clipboard
+        function copyPlayerId(playerId) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(playerId).then(() => {
+                    showToast(`Player ID ${playerId} copied to clipboard!`);
+                });
+            }
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Update submit button state
+        function updateSubmitButton() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            submitBtn.disabled = !anyChecked || playerIds.length === 0;
+        }
+
+        // Submit redemption confirmation
+        async function submitRedemption() {
+            if (!giftcode || playerIds.length === 0) {
+                showToast('No data to submit');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const redeemedIds = [];
+            
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    redeemedIds.push(playerIds[index]);
+                }
+            });
+
+            if (redeemedIds.length === 0) {
+                showToast('Please select at least one player ID');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Sending...';
+
+            try {
+                // Send data back to Discord bot via webhook or API endpoint
+                const response = await fetch('/api/redeem-callback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        giftcode: giftcode,
+                        redeemedIds: redeemedIds,
+                        timestamp: Date.now()
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`✅ Confirmed redemption for ${redeemedIds.length} player(s)`);
+                    
+                    // Reset checkboxes
+                    checkboxes.forEach(cb => cb.checked = false);
+                    
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.style.cssText = `
+                        background: #d4edda;
+                        border: 1px solid #c3e6cb;
+                        color: #155724;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                        text-align: center;
+                        font-weight: bold;
+                    `;
+                    successDiv.innerHTML = `
+                        <h4>✅ Redemption Confirmed!</h4>
+                        <p>Discord bot has been notified about the successful redemptions.</p>
+                        <p><strong>Confirmed for:</strong> ${redeemedIds.length} player(s)</p>
+                        ${sessionId ? `<p><small>Session: ${sessionId}</small></p>` : ''}
+                    `;
+                    
+                    document.querySelector('.submit-section').appendChild(successDiv);
+                    
+                } else {
+                    throw new Error('All endpoints failed');
+                }
+            } catch (error) {
+                console.error('Error sending redemption confirmation:', error);
+                
+                // Fallback: Show confirmation dialog and create manual notification
+                const message = `Redemption confirmed for:\n• Giftcode: ${giftcode}\n• Player IDs: ${redeemedIds.join(', ')}\n${sessionId ? `• Session: ${sessionId}` : ''}`;
+                
+                if (confirm(`${message}\n\nNote: Auto-notification to Discord bot failed. Please manually confirm in Discord.`)) {
+                    showToast(`Manual confirmation needed for ${redeemedIds.length} player(s)`);
+                    checkboxes.forEach(cb => cb.checked = false);
+                    
+                    // Show manual confirmation instructions
+                    const manualDiv = document.createElement('div');
+                    manualDiv.style.cssText = `
+                        background: #fff3cd;
+                        border: 1px solid #ffeeba;
+                        color: #856404;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                        text-align: left;
+                    `;
+                    manualDiv.innerHTML = `
+                        <h4>⚠️ Manual Confirmation Required</h4>
+                        <p>Please copy and paste this information in Discord:</p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace;">
+                            <strong>Giftcode:</strong> ${giftcode}<br>
+                            <strong>Redeemed for:</strong> ${redeemedIds.join(', ')}<br>
+                            ${sessionId ? `<strong>Session:</strong> ${sessionId}<br>` : ''}
+                            <strong>Timestamp:</strong> ${new Date().toISOString()}
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('Giftcode: ${giftcode}\\nRedeemed for: ${redeemedIds.join(', ')}\\n${sessionId ? `Session: ${sessionId}\\n` : ''}Timestamp: ${new Date().toISOString()}')" class="copy-btn">
+                            📋 Copy to Clipboard
+                        </button>
+                    `;
+                    
+                    document.querySelector('.submit-section').appendChild(manualDiv);
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✅ Confirm Redemptions';
+                updateSubmitButton();
+            }
+        }
+
+        // Initialize page when loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            parseURLParams();
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + C to copy giftcode
+                if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.matches('input')) {
+                    e.preventDefault();
+                    copyGiftcode();
+                }
+                
+                // Enter to submit if any checkboxes are checked
+                if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+                    submitRedemption();
+                }
+            });
+        });
