@@ -83,32 +83,6 @@
                 0 15px 35px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 rgba(255, 255, 255, 0.4),
                 0 8px 32px rgba(102, 126, 234, 0.3);
-            position: relative;
-            transform: translateZ(0);
-            transition: all 0.3s ease;
-        }
-
-        .section:hover {
-            transform: translateY(-5px);
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                0 15px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                transparent 50%, 
-                rgba(0, 0, 0, 0.05) 100%);
-            border-radius: 18px;
-            pointer-events: none;
         }
 
         .section h3 {
@@ -119,10 +93,6 @@
             align-items: center;
             gap: 12px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
         }
 
         .giftcode-display {
@@ -135,7 +105,6 @@
             font-weight: bold;
             text-align: center;
             margin-bottom: 15px;
-            position: relative;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -160,10 +129,6 @@
         .copy-btn:hover {
             background: #2980b9;
             transform: translateY(-2px);
-        }
-
-        .copy-btn.copied {
-            background: #27ae60;
         }
 
         .player-ids-table {
@@ -286,6 +251,23 @@
             padding: 40px;
         }
 
+        .reminder {
+            background: rgba(255, 193, 7, 0.2);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 5px solid #ffc107;
+        }
+
+        .reminder h4 {
+            margin-bottom: 10px;
+            color: #ffc107;
+        }
+
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -330,7 +312,7 @@
             <!-- Giftcode Section -->
             <div class="section">
                 <h3>🎫 Giftcode</h3>
-                <div id="giftcodeDisplay" class="giftcode-display">
+                <div id="giftcodeDisplay" class="giftcode-display" onclick="copyGiftcode()">
                     <span id="giftcodeText">Loading...</span>
                 </div>
                 <div style="text-align: center;">
@@ -348,12 +330,18 @@
 
             <!-- Submit Section -->
             <div class="submit-section">
-                <button class="submit-btn" id="submitBtn" onclick="submitRedemption()" disabled>
-                    ✅ Confirm Redemptions
+                <button class="submit-btn" id="submitBtn" onclick="confirmAll()" disabled>
+                    ✅ All Done - Notify Discord
                 </button>
                 <p style="margin-top: 15px; color: rgba(255, 255, 255, 0.8); font-style: italic;">
-                    Check the boxes next to Player IDs you have successfully redeemed
+                    Check the boxes for Player IDs you have successfully redeemed
                 </p>
+            </div>
+
+            <!-- Reminder Section -->
+            <div class="reminder">
+                <h4>🔔 Important Reminder</h4>
+                <p>After redeeming all giftcodes, don't forget to click the <strong>✅ Done</strong> button on the original Discord message to notify other users that the giftcodes have been successfully redeemed!</p>
             </div>
         </div>
     </div>
@@ -364,23 +352,16 @@
     <script>
         let giftcode = '';
         let playerIds = [];
-        let sessionId = '';
 
         // Parse URL parameters
         function parseURLParams() {
             const urlParams = new URLSearchParams(window.location.search);
             giftcode = urlParams.get('gc') || '';
             const idsParam = urlParams.get('ids') || '';
-            sessionId = urlParams.get('session') || '';
             playerIds = idsParam ? idsParam.split(',') : [];
 
             displayGiftcode();
             displayPlayerIds();
-            
-            // Show session info if available
-            if (sessionId) {
-                console.log('Session ID:', sessionId);
-            }
         }
 
         // Display giftcode
@@ -457,7 +438,7 @@
         function copyPlayerId(playerId) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(playerId).then(() => {
-                    showToast(`Player ID ${playerId} copied to clipboard!`);
+                    showToast(`Player ID ${playerId} copied!`);
                 });
             }
         }
@@ -482,13 +463,8 @@
             submitBtn.disabled = !anyChecked || playerIds.length === 0;
         }
 
-        // Submit redemption confirmation
-        async function submitRedemption() {
-            if (!giftcode || playerIds.length === 0) {
-                showToast('No data to submit');
-                return;
-            }
-
+        // Confirm all redemptions
+        function confirmAll() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const redeemedIds = [];
             
@@ -499,134 +475,164 @@
             });
 
             if (redeemedIds.length === 0) {
-                showToast('Please select at least one player ID');
+                showToast('Please check at least one player ID');
                 return;
             }
 
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Sending...';
-
-            try {
-                // Send data back to Discord bot via webhook
-                const payload = {
-                    giftcode: giftcode,
-                    redeemedIds: redeemedIds,
-                    sessionId: sessionId,
-                    timestamp: Date.now()
-                };
-
-                // Try multiple endpoints for better reliability
-                const endpoints = [
-                    'https://d9155119-6679-4bc0-84db-c9b5f3cf03e8-00-10vhbveridyr9.pike.replit.dev/redeem-callback',
-                    '/redeem-callback',
-                ];
-
-                let success = false;
-                for (const endpoint of endpoints) {
-                    try {
-                        const response = await fetch(endpoint, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (response.ok) {
-                            success = true;
-                            break;
-                        }
-                    } catch (e) {
-                        console.log(`Failed to reach ${endpoint}:`, e);
-                        continue;
-                    }
-                }
-
-                if (success) {
-                    showToast(`✅ Confirmed redemption for ${redeemedIds.length} player(s)`);
-                    
-                    // Reset checkboxes
-                    checkboxes.forEach(cb => cb.checked = false);
-                    
-                    // Show success message
-                    const successDiv = document.createElement('div');
-                    successDiv.style.cssText = `
-                        background: rgba(39, 174, 96, 0.2);
-                        backdrop-filter: blur(5px);
-                        border: 1px solid rgba(39, 174, 96, 0.5);
-                        color: #fff;
-                        padding: 20px;
-                        border-radius: 10px;
-                        margin: 20px 0;
-                        text-align: center;
+            // Hide the submit button
+            document.getElementById('submitBtn').style.display = 'none';
+            
+            // Show the reminder message with countdown
+            const reminderDiv = document.createElement('div');
+            reminderDiv.id = 'countdownReminder';
+            reminderDiv.style.cssText = `
+                background: rgba(255, 193, 7, 0.2);
+                backdrop-filter: blur(5px);
+                border: 1px solid rgba(255, 193, 7, 0.5);
+                color: #fff;
+                padding: 30px;
+                border-radius: 15px;
+                margin: 20px 0;
+                text-align: center;
+                border-left: 5px solid #ffc107;
+                font-size: 1.1em;
+            `;
+            reminderDiv.innerHTML = `
+                <h4 style="color: #ffc107; margin-bottom: 20px; font-size: 1.4em;">🔔 Important Reminder</h4>
+                <p style="margin-bottom: 15px; line-height: 1.6;">
+                    After redeeming all giftcodes, don't forget to click the <strong>✅ Done</strong> button on the original Discord message to notify other users that the giftcodes have been successfully redeemed!
+                </p>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <p style="font-size: 1.2em; margin-bottom: 10px;">
+                        🚀 Redirecting to Discord in: <span id="countdown" style="font-weight: bold; color: #ffc107; font-size: 1.4em;">5</span> seconds
+                    </p>
+                    <button onclick="redirectNow()" style="
+                        background: #5865F2; 
+                        color: white; 
+                        border: none; 
+                        padding: 10px 20px; 
+                        border-radius: 8px; 
+                        cursor: pointer; 
                         font-weight: bold;
-                    `;
-                    successDiv.innerHTML = `
-                        <h4>✅ Redemption Confirmed!</h4>
-                        <p>Discord bot has been notified about the successful redemptions.</p>
-                        <p><strong>Confirmed for:</strong> ${redeemedIds.length} player(s)</p>
-                        ${sessionId ? `<p><small>Session: ${sessionId}</small></p>` : ''}
-                    `;
-                    
-                    document.querySelector('.submit-section').appendChild(successDiv);
-                    
-                } else {
-                    throw new Error('All endpoints failed');
+                        margin-top: 10px;
+                    ">Go to Discord Now</button>
+                </div>
+            `;
+            
+            document.querySelector('.submit-section').appendChild(reminderDiv);
+            
+            // Start countdown
+            startCountdown();
+        }
+
+        // Start countdown and redirect
+        function startCountdown() {
+            let seconds = 5;
+            const countdownElement = document.getElementById('countdown');
+            
+            const countdownInterval = setInterval(() => {
+                seconds--;
+                if (countdownElement) {
+                    countdownElement.textContent = seconds;
                 }
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    redirectToDiscord();
+                }
+            }, 1000);
+        }
+
+        // Redirect to Discord
+        function redirectToDiscord() {
+            try {
+                // Try to open Discord app first
+                window.location.href = 'discord://';
+                
+                // Fallback to web Discord after a short delay
+                setTimeout(() => {
+                    window.open('https://discord.com/channels/@me', '_blank');
+                }, 500);
+                
+                // Close the window after redirect attempt
+                setTimeout(() => {
+                    window.close();
+                    
+                    // If window.close() doesn't work (some browsers block it),
+                    // show a message to manually close the tab
+                    if (!window.closed) {
+                        document.body.innerHTML = `
+                            <div style="
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                min-height: 100vh;
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                text-align: center;
+                                font-family: 'Segoe UI', sans-serif;
+                                padding: 20px;
+                            ">
+                                <div style="
+                                    background: rgba(0,0,0,0.3);
+                                    padding: 40px;
+                                    border-radius: 20px;
+                                    backdrop-filter: blur(10px);
+                                    border: 1px solid rgba(255,255,255,0.2);
+                                ">
+                                    <h2 style="margin-bottom: 20px;">✅ All Done!</h2>
+                                    <p style="font-size: 1.2em; margin-bottom: 20px;">
+                                        Discord should now be opening...
+                                    </p>
+                                    <p style="opacity: 0.8;">
+                                        You can safely close this tab and click <strong>✅ Done</strong> on your Discord message.
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }, 1000);
+                
             } catch (error) {
-                console.error('Error sending redemption confirmation:', error);
-                
-                // Fallback: Show confirmation dialog and create manual notification
-                const message = `Redemption confirmed for:\n• Giftcode: ${giftcode}\n• Player IDs: ${redeemedIds.join(', ')}\n${sessionId ? `• Session: ${sessionId}` : ''}`;
-                
-                if (confirm(`${message}\n\nNote: Auto-notification to Discord bot failed. Please manually confirm in Discord.`)) {
-                    showToast(`Manual confirmation needed for ${redeemedIds.length} player(s)`);
-                    checkboxes.forEach(cb => cb.checked = false);
-                    
-                    // Show manual confirmation instructions
-                    const manualDiv = document.createElement('div');
-                    manualDiv.style.cssText = `
-                        background: rgba(255, 193, 7, 0.2);
-                        backdrop-filter: blur(5px);
-                        border: 1px solid rgba(255, 193, 7, 0.5);
-                        color: #fff;
-                        padding: 20px;
-                        border-radius: 10px;
-                        margin: 20px 0;
-                        text-align: left;
-                    `;
-                    manualDiv.innerHTML = `
-                        <h4>⚠️ Manual Confirmation Required</h4>
-                        <p>Please copy and paste this information in Discord:</p>
-                        <div style="background: rgba(44, 62, 80, 0.6); backdrop-filter: blur(5px); padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; border: 1px solid rgba(255, 255, 255, 0.3);">
-                            <strong>Giftcode:</strong> ${giftcode}<br>
-                            <strong>Redeemed for:</strong> ${redeemedIds.join(', ')}<br>
-                            ${sessionId ? `<strong>Session:</strong> ${sessionId}<br>` : ''}
-                            <strong>Timestamp:</strong> ${new Date().toISOString()}
+                console.log('Redirect error:', error);
+                // Show manual close message if redirect fails
+                setTimeout(() => {
+                    document.body.innerHTML = `
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            text-align: center;
+                            font-family: 'Segoe UI', sans-serif;
+                            padding: 20px;
+                        ">
+                            <div style="
+                                background: rgba(0,0,0,0.3);
+                                padding: 40px;
+                                border-radius: 20px;
+                                backdrop-filter: blur(10px);
+                                border: 1px solid rgba(255,255,255,0.2);
+                            ">
+                                <h2 style="margin-bottom: 20px;">✅ All Done!</h2>
+                                <p style="font-size: 1.2em; margin-bottom: 20px;">
+                                    Please return to Discord and click <strong>✅ Done</strong> on your message.
+                                </p>
+                                <p style="opacity: 0.8;">
+                                    You can now close this tab.
+                                </p>
+                            </div>
                         </div>
-                        <button onclick="copyManualInfo('${giftcode}', '${redeemedIds.join(', ')}', '${sessionId}', '${new Date().toISOString()}')" class="copy-btn">
-                            📋 Copy to Clipboard
-                        </button>
                     `;
-                    
-                    document.querySelector('.submit-section').appendChild(manualDiv);
-                }
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '✅ Confirm Redemptions';
-                updateSubmitButton();
+                }, 1000);
             }
         }
 
-        // Copy manual confirmation info
-        function copyManualInfo(giftcode, redeemedIds, sessionId, timestamp) {
-            const text = `Giftcode: ${giftcode}\nRedeemed for: ${redeemedIds}\n${sessionId ? `Session: ${sessionId}\n` : ''}Timestamp: ${timestamp}`;
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast('Manual confirmation info copied to clipboard!');
-                });
-            }
+        // Manual redirect function
+        function redirectNow() {
+            redirectToDiscord();
         }
 
         // Initialize page when loaded
@@ -635,15 +641,15 @@
             
             // Add keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Ctrl/Cmd + C to copy giftcode
+                // Ctrl/Cmd + C to copy giftcode when not in input
                 if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.matches('input')) {
                     e.preventDefault();
                     copyGiftcode();
                 }
                 
-                // Enter to submit if any checkboxes are checked
+                // Enter to submit if button is enabled
                 if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
-                    submitRedemption();
+                    confirmAll();
                 }
             });
         });
