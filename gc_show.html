@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asphalt Legends Gift Codes - A9 Helper</title>
+    <title>A9 Gift Codes - A9 Helper</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -24,7 +24,7 @@
             backdrop-filter: blur(15px);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            max-width: 600px;
+            max-width: 500px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
@@ -36,15 +36,16 @@
         .title {
             font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
         .code-item {
             background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 15px;
-            padding: 1.5rem;
+            padding: 1rem;
             margin-bottom: 1rem;
             transition: all 0.3s ease;
+            text-align: left;
         }
         .code-item:hover {
             background: rgba(255, 255, 255, 0.2);
@@ -54,16 +55,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             flex-wrap: wrap;
             gap: 0.5rem;
         }
         .code-status {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
         }
         .code-timestamp {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.8;
         }
         .code-display {
@@ -71,47 +72,42 @@
             font-size: 1.1rem;
             font-weight: 700;
             background: rgba(255, 255, 255, 0.25);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            margin: 1rem 0;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
             word-break: break-all;
             letter-spacing: 1px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
             transition: all 0.3s ease;
             user-select: all;
-            position: relative;
+            text-align: center;
         }
         .code-display:hover {
             background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.02);
         }
         .copy-btn {
             background: rgba(40, 167, 69, 0.3);
             border: 2px solid rgba(40, 167, 69, 0.5);
             color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             transition: all 0.3s ease;
             width: 100%;
-            max-width: 200px;
-            margin: 0.5rem auto;
             display: block;
+            text-align: center;
         }
         .copy-btn:hover {
             background: rgba(40, 167, 69, 0.5);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
         }
         .copy-btn.copied {
             background: rgba(40, 167, 69, 0.6);
             border-color: rgba(40, 167, 69, 0.8);
-        }
-        .copy-btn.failed {
-            background: rgba(220, 53, 69, 0.3);
-            border-color: rgba(220, 53, 69, 0.5);
         }
         .redeem-btn {
             background: rgba(255, 193, 7, 0.3);
@@ -120,18 +116,60 @@
             padding: 1rem 2rem;
             border-radius: 12px;
             cursor: pointer;
-            margin: 1.5rem auto;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             transition: all 0.3s ease;
-            display: block;
             text-decoration: none;
-            max-width: 300px;
+            display: inline-block;
+            text-align: center;
         }
         .redeem-btn:hover {
             background: rgba(255, 193, 7, 0.5);
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .permission-notice {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            display: none;
+        }
+        .permission-notice.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        .steps {
+            text-align: left;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .steps.show {
+            display: block;
+        }
+        .step {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .step::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        .no-codes {
+            text-align: center;
+            padding: 2rem;
+            opacity: 0.8;
         }
         .status-message {
             position: fixed;
@@ -150,72 +188,6 @@
         .status-message.show {
             transform: translateX(0);
         }
-        .status-message.error {
-            background: rgba(220, 53, 69, 0.9);
-        }
-        .permission-notice {
-            background: rgba(255, 193, 7, 0.2);
-            border: 2px solid rgba(255, 193, 7, 0.5);
-            padding: 1rem;
-            border-radius: 12px;
-            margin: 1rem 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            display: none;
-        }
-        .permission-notice.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-        .manual-steps {
-            text-align: left;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: none;
-        }
-        .manual-steps.show {
-            display: block;
-        }
-        .step {
-            margin: 0.5rem 0;
-            padding-left: 1.5rem;
-            position: relative;
-        }
-        .step::before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: #FFD700;
-            font-weight: bold;
-        }
-        .no-codes {
-            text-align: center;
-            font-size: 1.2rem;
-            opacity: 0.8;
-            margin: 2rem 0;
-        }
-        .loading {
-            text-align: center;
-            font-size: 1.2rem;
-            margin: 2rem 0;
-        }
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #FFD700;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-left: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -229,13 +201,15 @@
         @media (max-width: 768px) {
             .container {
                 padding: 1.5rem;
+                max-height: 90vh;
             }
             .code-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            .copy-btn {
-                max-width: none;
+            .redeem-btn {
+                min-width: auto;
+                width: 100%;
             }
             .status-message {
                 right: 10px;
@@ -251,45 +225,43 @@
 <body>
     <div class="container">
         <div class="logo">🎮</div>
-        <div class="title">Asphalt Legends Gift Codes</div>
+        <div class="title">Last 10 Gift Codes</div>
         
-        <div id="loadingContainer" class="loading">
-            Loading gift codes<span class="spinner"></span>
+        <div id="codesContainer">
+            <!-- Codes will be populated here -->
         </div>
         
-        <div id="codesContainer" style="display: none;"></div>
-        
         <div id="noCodesMessage" class="no-codes" style="display: none;">
-            📭 No gift codes available at the moment
+            📭 No gift codes provided
         </div>
         
         <!-- Permission Notice -->
         <div class="permission-notice" id="permissionNotice">
             <strong>🔐 Clipboard Permission Needed</strong><br>
-            Some browsers need permission to copy codes automatically. Click "Allow" when prompted!
+            Your browser needs permission to copy codes automatically. Click "Allow" when prompted!
         </div>
         
         <!-- Manual Steps for Different Browsers -->
-        <div class="manual-steps" id="manualSteps">
-            <strong>🛠️ Manual Copy Instructions:</strong>
+        <div class="steps" id="manualSteps">
+            <strong>🛠️ Manual Copy Steps:</strong>
             <div class="step"><strong>Chrome/Edge:</strong> Click the 🔒 icon in address bar → Allow clipboard</div>
             <div class="step"><strong>Firefox:</strong> Click shield icon → Allow clipboard access</div>
             <div class="step"><strong>Safari:</strong> Click settings → Allow clipboard access</div>
             <div class="step"><strong>Mobile:</strong> Tap and hold the code → Select "Copy"</div>
-            <div class="step"><strong>Discord/In-App:</strong> Tap and hold code, then select copy</div>
+            <div class="step"><strong>Discord/In-App:</strong> Long press the code to select and copy</div>
         </div>
 
         <!-- Redeem Button -->
-        <a href="https://www.gameloft.com/redeem/asphalt-legends" target="_blank" class="redeem-btn" id="redeemBtn" style="display: none;">
-            🚀 Open Redemption Site
-        </a>
+        <button onclick="openRedeemSites()" class="redeem-btn" style="margin-top: 2rem; width: 100%;">
+            🎁 Redeem #GiftCode
+        </button>
     </div>
 
     <!-- Status Message -->
     <div class="status-message" id="statusMessage"></div>
 
     <script>
-        let hasClipboardPermission = null;
+        let hasClipboardPermission = false;
         let isMobile = false;
         let codes = [];
 
@@ -315,30 +287,28 @@
 
         // Check clipboard permission
         async function checkClipboardPermission() {
+            const storedPermission = localStorage.getItem('clipboardPermission');
+            if (storedPermission === 'granted') {
+                hasClipboardPermission = true;
+                return true;
+            }
             try {
                 if (navigator.permissions && navigator.permissions.query) {
                     const permission = await navigator.permissions.query({name: 'clipboard-write'});
-                    hasClipboardPermission = permission.state === 'granted';
-                } else if (navigator.clipboard && window.isSecureContext) {
-                    // Try a test write to check permission
-                    try {
-                        await navigator.clipboard.writeText('');
+                    if (permission.state === 'granted') {
                         hasClipboardPermission = true;
-                    } catch (err) {
-                        hasClipboardPermission = false;
+                        localStorage.setItem('clipboardPermission', 'granted');
+                        return true;
                     }
-                } else {
-                    hasClipboardPermission = false;
                 }
             } catch (err) {
-                console.log('Permission check failed:', err);
-                hasClipboardPermission = false;
+                console.log('Permission API not supported');
             }
             
             if (!hasClipboardPermission && isMobile) {
                 document.getElementById('permissionNotice').classList.add('show');
-                document.getElementById('manualSteps').classList.add('show');
             }
+            return false;
         }
 
         // Load codes from URL parameters
@@ -347,82 +317,29 @@
             const codesParam = urlParams.get('codes');
             
             if (!codesParam) {
-                // Show demo codes or instructions when no codes provided
-                showDemoCodes();
+                document.getElementById('noCodesMessage').style.display = 'block';
                 return;
             }
 
             try {
-                // Decode and parse the codes JSON
                 const decodedCodes = decodeURIComponent(codesParam);
                 codes = JSON.parse(decodedCodes);
                 
                 if (!Array.isArray(codes) || codes.length === 0) {
-                    showDemoCodes();
+                    document.getElementById('noCodesMessage').style.display = 'block';
                     return;
                 }
                 
                 displayCodes();
             } catch (err) {
                 console.error('Failed to parse codes:', err);
-                showDemoCodes();
+                document.getElementById('noCodesMessage').style.display = 'block';
             }
-        }
-
-        // Show demo codes when no URL parameters provided
-        function showDemoCodes() {
-            const loadingContainer = document.getElementById('loadingContainer');
-            const codesContainer = document.getElementById('codesContainer');
-            const redeemBtn = document.getElementById('redeemBtn');
-            
-            loadingContainer.style.display = 'none';
-            codesContainer.style.display = 'block';
-            redeemBtn.style.display = 'block';
-            
-            // Create demo message
-            codesContainer.innerHTML = `
-                <div style="text-align: center; padding: 2rem; background: rgba(255, 193, 7, 0.2); border: 2px solid rgba(255, 193, 7, 0.5); border-radius: 15px; margin-bottom: 1rem;">
-                    <h3 style="margin-top: 0; color: #FFD700;">📱 Mobile Gift Code Helper</h3>
-                    <p style="margin-bottom: 1rem; opacity: 0.9;">This page helps you copy gift codes on mobile devices and in Discord's browser.</p>
-                    <p style="font-size: 0.9rem; opacity: 0.8;">To use this page, it should be opened from the Discord bot with gift codes as parameters.</p>
-                    <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 1rem;">Use <code>/giftcode_show</code> in Discord to view available codes here.</p>
-                </div>
-                
-                <div style="text-align: center; padding: 1.5rem; background: rgba(255, 255, 255, 0.1); border-radius: 15px; margin-bottom: 1rem;">
-                    <h4 style="margin-top: 0;">🎮 How to Get Gift Codes:</h4>
-                    <div style="text-align: left; max-width: 400px; margin: 0 auto;">
-                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
-                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">1.</span>
-                            Go to your Discord server
-                        </div>
-                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
-                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">2.</span>
-                            Use <code>/giftcode_show</code> command
-                        </div>
-                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
-                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">3.</span>
-                            Click "📱 Mobile Redeem" button
-                        </div>
-                        <div style="margin: 0.5rem 0; padding-left: 1.5rem; position: relative;">
-                            <span style="position: absolute; left: 0; color: #FFD700; font-weight: bold;">4.</span>
-                            Copy codes and redeem them!
-                        </div>
-                    </div>
-                </div>
-            `;
         }
 
         // Display the codes
         function displayCodes() {
-            const loadingContainer = document.getElementById('loadingContainer');
             const codesContainer = document.getElementById('codesContainer');
-            const redeemBtn = document.getElementById('redeemBtn');
-            
-            loadingContainer.style.display = 'none';
-            codesContainer.style.display = 'block';
-            redeemBtn.style.display = 'block';
-            
-            // Clear existing content
             codesContainer.innerHTML = '';
             
             codes.forEach((codeData, index) => {
@@ -436,16 +353,12 @@
             const codeItem = document.createElement('div');
             codeItem.className = 'code-item';
             
-            // Determine status emoji and text
+            // Determine status emoji
             let statusEmoji = '🕒';
-            let statusText = 'Unknown';
-            
             if (codeData.status === 'active') {
                 statusEmoji = '✅';
-                statusText = 'Active';
             } else if (codeData.status === 'expired') {
                 statusEmoji = '❌';
-                statusText = 'Expired';
             }
             
             // Format timestamp
@@ -453,8 +366,12 @@
             if (codeData.timestamp) {
                 try {
                     const timestamp = parseInt(codeData.timestamp);
-                    formattedTime = new Date(timestamp * 1000).toLocaleDateString() + ' ' + 
-                                   new Date(timestamp * 1000).toLocaleTimeString();
+                    const date = new Date(timestamp * 1000);
+                    formattedTime = date.getFullYear() + '-' + 
+                                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                                   String(date.getDate()).padStart(2, '0') + ' ' + 
+                                   String(date.getHours()).padStart(2, '0') + ':' + 
+                                   String(date.getMinutes()).padStart(2, '0');
                 } catch (err) {
                     formattedTime = codeData.timestamp;
                 }
@@ -462,7 +379,7 @@
             
             codeItem.innerHTML = `
                 <div class="code-header">
-                    <div class="code-status">${statusEmoji} ${statusText}</div>
+                    <div class="code-status">${statusEmoji} ${codeData.code}</div>
                     <div class="code-timestamp">${formattedTime}</div>
                 </div>
                 <div class="code-display" onclick="selectText(this)" data-code="${codeData.code}">
@@ -482,22 +399,17 @@
             const originalText = button.textContent;
             
             try {
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(code);
-                    button.textContent = '✅ Copied!';
-                    button.classList.add('copied');
-                    showStatusMessage('Code copied to clipboard!', 'success');
-                    hasClipboardPermission = true;
-                } else {
-                    throw new Error('Clipboard not available');
-                }
+                await navigator.clipboard.writeText(code);
+                hasClipboardPermission = true;
+                localStorage.setItem('clipboardPermission', 'granted');
+                button.textContent = '✅ Copied!';
+                button.classList.add('copied');
+                showStatusMessage('Code copied successfully!');
             } catch (err) {
                 console.log('Clipboard copy failed:', err);
-                button.textContent = '❌ Failed';
-                button.classList.add('failed');
-                showStatusMessage('Copy failed - try manual selection', 'error');
-                
-                // Show manual steps if not already shown
+                // Fallback to text selection
+                selectText(button.previousElementSibling);
+                showStatusMessage('Code selected - press Ctrl+C to copy');
                 if (!document.getElementById('manualSteps').classList.contains('show')) {
                     document.getElementById('manualSteps').classList.add('show');
                 }
@@ -506,7 +418,7 @@
             // Reset button after 2 seconds
             setTimeout(() => {
                 button.textContent = originalText;
-                button.classList.remove('copied', 'failed');
+                button.classList.remove('copied');
             }, 2000);
         }
 
@@ -517,42 +429,35 @@
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
-            
-            try {
-                const success = document.execCommand('copy');
-                if (success) {
-                    showStatusMessage('Code copied to clipboard!', 'success');
-                } else {
-                    showStatusMessage('Code selected - press Ctrl+C to copy', 'info');
-                }
-            } catch (err) {
-                showStatusMessage('Code selected - press Ctrl+C to copy', 'info');
-            }
         }
 
         // Show status message
-        function showStatusMessage(message, type = 'success') {
+        function showStatusMessage(message) {
             const statusMessage = document.getElementById('statusMessage');
             statusMessage.textContent = message;
-            statusMessage.className = 'status-message show';
+            statusMessage.classList.add('show');
             
-            if (type === 'error') {
-                statusMessage.classList.add('error');
-            } else {
-                statusMessage.classList.remove('error');
-            }
-            
-            // Hide after 3 seconds
             setTimeout(() => {
                 statusMessage.classList.remove('show');
             }, 3000);
         }
 
+        // Open both redemption sites in separate tabs
+        function openRedeemSites() {
+            // Open Gameloft official redemption site
+            window.open('https://www.gameloft.com/redeem/asphalt-legends', '_blank');
+            
+            // Add a small delay to prevent popup blockers
+            setTimeout(() => {
+                // Open second redemption site (you can change this URL)
+                window.open('https://www.gameloft.com/redeem/asphalt-legends', '_blank');
+            }, 100);
+        }
+
         // Handle page visibility changes
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && hasClipboardPermission) {
-                // Page became visible again - user might have come back from redemption site
-                showStatusMessage('Welcome back! Ready to copy more codes', 'success');
+                showStatusMessage('Welcome back! Ready to copy codes');
             }
         });
     </script>
