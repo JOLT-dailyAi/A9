@@ -325,8 +325,8 @@
                 const decodedCodes = decodeURIComponent(codesParam);
                 console.log('Received codes parameter:', decodedCodes);
                 
-                // Check if it's the new compact format (emoji+code,emoji+code,...)
-                if (decodedCodes.includes(',') && !decodedCodes.startsWith('[')) {
+                // Check if it's the new compact format (A/X/P+code,A/X/P+code,...)
+                if (decodedCodes.includes(',') && !decodedCodes.startsWith('[') && /^[AXP]/.test(decodedCodes)) {
                     codes = parseCompactFormat(decodedCodes);
                 } else {
                     // Try to parse as JSON (old format)
@@ -345,7 +345,7 @@
             }
         }
 
-        // Parse the new compact format: ✅code1,❌code2,🕒code3
+        // Parse the new compact format: Acode1,Xcode2,Pcode3 (A=Active, X=eXpired, P=Pending)
         function parseCompactFormat(compactString) {
             const codeEntries = compactString.split(',');
             const parsedCodes = [];
@@ -356,11 +356,11 @@
                     const code = entry.substring(1);
                     
                     let status = 'pending';
-                    if (firstChar === '✅') {
+                    if (firstChar === 'A') {
                         status = 'active';
-                    } else if (firstChar === '❌') {
+                    } else if (firstChar === 'X') {
                         status = 'expired';
-                    } else if (firstChar === '🕒') {
+                    } else if (firstChar === 'P') {
                         status = 'pending';
                     }
                     
