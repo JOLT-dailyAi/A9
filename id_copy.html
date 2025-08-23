@@ -385,6 +385,18 @@
                 status.innerHTML = '✅ Welcome back! Your ID is in your clipboard';
             }
         });
+
+        // Open both redemption sites in separate tabs
+        function openRedeemSites() {
+            // Open Gameloft official redemption site
+            window.open('https://www.gameloft.com/redeem/asphalt-legends', '_blank');
+            
+            // Add a small delay to prevent popup blockers
+            setTimeout(() => {
+                // Open second redemption site (you can change this URL to whatever second site you want)
+                window.open('https://www.gameloft.com/redeem/asphalt-legends', '_blank');
+            }, 100);
+        }
     </script>
 </body>
 </html>
