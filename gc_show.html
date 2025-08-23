@@ -323,7 +323,15 @@
 
             try {
                 const decodedCodes = decodeURIComponent(codesParam);
-                codes = JSON.parse(decodedCodes);
+                console.log('Received codes parameter:', decodedCodes);
+                
+                // Check if it's the new compact format (emoji+code,emoji+code,...)
+                if (decodedCodes.includes(',') && !decodedCodes.startsWith('[')) {
+                    codes = parseCompactFormat(decodedCodes);
+                } else {
+                    // Try to parse as JSON (old format)
+                    codes = JSON.parse(decodedCodes);
+                }
                 
                 if (!Array.isArray(codes) || codes.length === 0) {
                     document.getElementById('noCodesMessage').style.display = 'block';
@@ -335,6 +343,37 @@
                 console.error('Failed to parse codes:', err);
                 document.getElementById('noCodesMessage').style.display = 'block';
             }
+        }
+
+        // Parse the new compact format: ✅code1,❌code2,🕒code3
+        function parseCompactFormat(compactString) {
+            const codeEntries = compactString.split(',');
+            const parsedCodes = [];
+            
+            codeEntries.forEach(entry => {
+                if (entry.length > 1) {
+                    const firstChar = entry.charAt(0);
+                    const code = entry.substring(1);
+                    
+                    let status = 'pending';
+                    if (firstChar === '✅') {
+                        status = 'active';
+                    } else if (firstChar === '❌') {
+                        status = 'expired';
+                    } else if (firstChar === '🕒') {
+                        status = 'pending';
+                    }
+                    
+                    parsedCodes.push({
+                        code: code,
+                        status: status,
+                        timestamp: null // No timestamp in compact format
+                    });
+                }
+            });
+            
+            console.log('Parsed compact format:', parsedCodes);
+            return parsedCodes;
         }
 
         // Display the codes
@@ -361,8 +400,8 @@
                 statusEmoji = '❌';
             }
             
-            // Format timestamp
-            let formattedTime = 'Unknown time';
+            // Format timestamp (only if available)
+            let formattedTime = '';
             if (codeData.timestamp) {
                 try {
                     const timestamp = parseInt(codeData.timestamp);
@@ -380,7 +419,7 @@
             codeItem.innerHTML = `
                 <div class="code-header">
                     <div class="code-status">${statusEmoji} ${codeData.code}</div>
-                    <div class="code-timestamp">${formattedTime}</div>
+                    ${formattedTime ? `<div class="code-timestamp">${formattedTime}</div>` : ''}
                 </div>
                 <div class="code-display" onclick="selectText(this)" data-code="${codeData.code}">
                     ${codeData.code}
