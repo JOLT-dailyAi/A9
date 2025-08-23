@@ -1,45 +1,4 @@
-try {
-                // Send data back to Discord bot via webhook or API endpoint
-                const payload = {
-                    giftcode: giftcode,
-                    redeemedIds: redeemedIds,
-                    sessionId: sessionId,
-                    timestamp: Date.now()
-                };
-
-                // Try multiple endpoints for better reliability
-                const endpoints = [
-                    'https://your-bot-webhook.com/redeem-callback',
-                    '/api/redeem-callback',
-                    // Add your actual webhook URL here
-                ];
-
-                let success = false;
-                for (const endpoint of endpoints) {
-                    try {
-                        const response = await fetch(endpoint, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (response.ok) {
-                            success = true;
-                            break;
-                        }
-                    } catch (e) {
-                        console.log(`Failed to reach ${endpoint}:`, e);
-                        continue;
-                    }
-                }
-
-                if (success) {
-                    showToast(`✅ Confirmed redemption for ${redeemedIds.length} player(s)`);
-                    
-                    // Reset checkboxes
-                    checkboxes.forEach(cb => cb.checked = false);<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -62,9 +21,11 @@ try {
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(102, 126, 234, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             overflow: hidden;
         }
 
@@ -112,20 +73,56 @@ try {
         }
 
         .section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 2px solid #e9ecef;
+            background: rgba(102, 126, 234, 0.25);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 8px 32px rgba(102, 126, 234, 0.3);
+            position: relative;
+            transform: translateZ(0);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 50%, 
+                rgba(0, 0, 0, 0.05) 100%);
+            border-radius: 18px;
+            pointer-events: none;
         }
 
         .section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.4em;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
         }
 
         .giftcode-display {
@@ -173,17 +170,20 @@ try {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            background: white;
+            background: rgba(102, 126, 234, 0.1);
+            backdrop-filter: blur(5px);
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .player-ids-table th,
         .player-ids-table td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
 
         .player-ids-table th {
@@ -195,23 +195,25 @@ try {
         }
 
         .player-ids-table tr:hover {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .player-id {
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            color: #2c3e50;
+            color: #fff;
             cursor: pointer;
             padding: 8px;
-            background: #ecf0f1;
+            background: rgba(44, 62, 80, 0.8);
             border-radius: 5px;
             display: inline-block;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .player-id:hover {
-            background: #bdc3c7;
+            background: rgba(189, 195, 199, 0.8);
+            color: #2c3e50;
             transform: scale(1.05);
         }
 
@@ -279,7 +281,7 @@ try {
 
         .no-data {
             text-align: center;
-            color: #7f8c8d;
+            color: rgba(255, 255, 255, 0.7);
             font-style: italic;
             padding: 40px;
         }
@@ -349,7 +351,7 @@ try {
                 <button class="submit-btn" id="submitBtn" onclick="submitRedemption()" disabled>
                     ✅ Confirm Redemptions
                 </button>
-                <p style="margin-top: 15px; color: #7f8c8d; font-style: italic;">
+                <p style="margin-top: 15px; color: rgba(255, 255, 255, 0.8); font-style: italic;">
                     Check the boxes next to Player IDs you have successfully redeemed
                 </p>
             </div>
@@ -506,20 +508,42 @@ try {
             submitBtn.textContent = '⏳ Sending...';
 
             try {
-                // Send data back to Discord bot via webhook or API endpoint
-                const response = await fetch('/api/redeem-callback', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        giftcode: giftcode,
-                        redeemedIds: redeemedIds,
-                        timestamp: Date.now()
-                    })
-                });
+                // Send data back to Discord bot via webhook
+                const payload = {
+                    giftcode: giftcode,
+                    redeemedIds: redeemedIds,
+                    sessionId: sessionId,
+                    timestamp: Date.now()
+                };
 
-                if (response.ok) {
+                // Try multiple endpoints for better reliability
+                const endpoints = [
+                    'https://d9155119-6679-4bc0-84db-c9b5f3cf03e8-00-10vhbveridyr9.pike.replit.dev/redeem-callback',
+                    '/redeem-callback',
+                ];
+
+                let success = false;
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            success = true;
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`Failed to reach ${endpoint}:`, e);
+                        continue;
+                    }
+                }
+
+                if (success) {
                     showToast(`✅ Confirmed redemption for ${redeemedIds.length} player(s)`);
                     
                     // Reset checkboxes
@@ -528,9 +552,10 @@ try {
                     // Show success message
                     const successDiv = document.createElement('div');
                     successDiv.style.cssText = `
-                        background: #d4edda;
-                        border: 1px solid #c3e6cb;
-                        color: #155724;
+                        background: rgba(39, 174, 96, 0.2);
+                        backdrop-filter: blur(5px);
+                        border: 1px solid rgba(39, 174, 96, 0.5);
+                        color: #fff;
                         padding: 20px;
                         border-radius: 10px;
                         margin: 20px 0;
@@ -562,9 +587,10 @@ try {
                     // Show manual confirmation instructions
                     const manualDiv = document.createElement('div');
                     manualDiv.style.cssText = `
-                        background: #fff3cd;
-                        border: 1px solid #ffeeba;
-                        color: #856404;
+                        background: rgba(255, 193, 7, 0.2);
+                        backdrop-filter: blur(5px);
+                        border: 1px solid rgba(255, 193, 7, 0.5);
+                        color: #fff;
                         padding: 20px;
                         border-radius: 10px;
                         margin: 20px 0;
@@ -573,13 +599,13 @@ try {
                     manualDiv.innerHTML = `
                         <h4>⚠️ Manual Confirmation Required</h4>
                         <p>Please copy and paste this information in Discord:</p>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace;">
+                        <div style="background: rgba(44, 62, 80, 0.6); backdrop-filter: blur(5px); padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; border: 1px solid rgba(255, 255, 255, 0.3);">
                             <strong>Giftcode:</strong> ${giftcode}<br>
                             <strong>Redeemed for:</strong> ${redeemedIds.join(', ')}<br>
                             ${sessionId ? `<strong>Session:</strong> ${sessionId}<br>` : ''}
                             <strong>Timestamp:</strong> ${new Date().toISOString()}
                         </div>
-                        <button onclick="navigator.clipboard.writeText('Giftcode: ${giftcode}\\nRedeemed for: ${redeemedIds.join(', ')}\\n${sessionId ? `Session: ${sessionId}\\n` : ''}Timestamp: ${new Date().toISOString()}')" class="copy-btn">
+                        <button onclick="copyManualInfo('${giftcode}', '${redeemedIds.join(', ')}', '${sessionId}', '${new Date().toISOString()}')" class="copy-btn">
                             📋 Copy to Clipboard
                         </button>
                     `;
@@ -590,6 +616,16 @@ try {
                 submitBtn.disabled = false;
                 submitBtn.textContent = '✅ Confirm Redemptions';
                 updateSubmitButton();
+            }
+        }
+
+        // Copy manual confirmation info
+        function copyManualInfo(giftcode, redeemedIds, sessionId, timestamp) {
+            const text = `Giftcode: ${giftcode}\nRedeemed for: ${redeemedIds}\n${sessionId ? `Session: ${sessionId}\n` : ''}Timestamp: ${timestamp}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Manual confirmation info copied to clipboard!');
+                });
             }
         }
 
@@ -611,3 +647,6 @@ try {
                 }
             });
         });
+    </script>
+</body>
+</html>
